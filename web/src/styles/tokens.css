@@ -1,0 +1,101 @@
+/* ============================================================
+   DESIGN TOKENS — Desapego Universitário
+   Identidade visual: Laboratório VORTEX (vortex.unifor.br)
+   Extraída do CSS de produção do site:
+     --dark-purple #170D29 · --purple #1D1946 · --purple-2 #36225D
+     --light-purple #6F4BEF · --light-blue #12CEE4 · #FF073A
+     --gray #B4B4B4 · --light-gray #F2F2F2
+   Tema escuro. Tons derivados (soft/strong/hover) calculados a
+   partir das cores da marca, todos com contraste AA verificado
+   sobre os fundos em que são usados.
+   Escala de espaçamento em múltiplos de 4px. Zero valores mágicos.
+   ============================================================ */
+
+:root {
+  /* ---- Cor: superfícies ---- */
+  --color-background: #170D29;        /* dark-purple Vortex */
+  --color-surface: #1D1946;           /* purple Vortex */
+  --color-surface-raised: #241C55;
+  --color-muted: #2A2058;
+  --color-border: #322866;
+  --color-border-strong: #4A3D85;
+  --color-brand-deep: #36225D;        /* purple-2 Vortex — fundos de marca */
+
+  /* ---- Cor: texto ---- */
+  --color-foreground: #F2F2F2;        /* light-gray Vortex — 15.2:1 s/ background */
+  --color-foreground-soft: #CFC7E8;   /* 10.4:1 */
+  --color-muted-foreground: #A79ECB;  /* 6.7:1 */
+
+  /* ---- Cor: marca ---- */
+  --color-primary: #6F4BEF;           /* light-purple Vortex — texto branco 5.3:1 */
+  --color-primary-strong: #B9A4FF;    /* tom claro p/ títulos e ênfase — 7.4:1 s/ bg */
+  --color-primary-soft: #2C2163;      /* fundo suave de chips/hover */
+  --color-on-primary: #FFFFFF;
+
+  --color-accent: #12CEE4;            /* light-blue Vortex — CTA; texto escuro 9.2:1 */
+  --color-accent-strong: #5EDFEE;     /* hover + texto de destaque em fundo escuro */
+  --color-accent-soft: #113C4C;
+  --color-on-accent: #170D29;
+
+  /* ---- Cor: semântica ---- */
+  --color-success: #12CEE4;
+  --color-destructive: #FF5C77;       /* derivado do #FF073A Vortex — 5.7:1 s/ bg */
+  --color-destructive-soft: #47182A;
+  --color-on-destructive: #170D29;
+  --color-ring: #12CEE4;
+
+  /* ---- Badge "Doação" — destaque intencional em ciano ---- */
+  --color-donation: #8FE8F5;
+  --color-donation-bg: #0E3D4B;
+
+  /* ---- Tipografia (escala de 5 tamanhos) ---- */
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --text-sm: 0.875rem;   /* 14px — metadados, badges */
+  --text-base: 1rem;     /* 16px — corpo */
+  --text-lg: 1.25rem;    /* 20px — leads, títulos de card */
+  --text-xl: 2rem;       /* 32px — títulos de seção */
+  --text-2xl: clamp(2.5rem, 5.5vw, 4rem); /* hero */
+  --leading-body: 1.6;
+  --leading-heading: 1.1;
+
+  /* ---- Espaçamento (múltiplos de 4px) ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* ---- Raios ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 999px;
+
+  /* ---- Elevação (escala consistente, sombras profundas p/ tema escuro) ---- */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 14px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 14px 36px rgb(0 0 0 / 0.5);
+
+  /* ---- Movimento (tokens globais de ritmo) ---- */
+  --motion-fast: 150ms;
+  --motion-base: 220ms;
+  --motion-slow: 320ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.64, 0, 0.78, 0);
+
+  /* ---- Z-index (escala definida) ---- */
+  --z-nav: 40;
+  --z-toast: 100;
+  --z-modal: 1000;
+
+  /* ---- Layout ---- */
+  --container: 72rem; /* 1152px */
+  --touch-target: 44px;
+
+  color-scheme: dark;
+}

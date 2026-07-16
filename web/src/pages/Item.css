@@ -1,0 +1,313 @@
+.item {
+  padding-block: var(--space-6) var(--space-24);
+}
+
+/* ---- Breadcrumb ---- */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-muted-foreground);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.breadcrumb a {
+  color: var(--color-primary-strong);
+  font-weight: 500;
+  min-height: auto;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.breadcrumb-atual {
+  max-width: 32ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Grid principal ---- */
+.item-grid {
+  display: grid;
+  gap: var(--space-8);
+}
+
+@media (min-width: 1024px) {
+  .item-grid {
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: start;
+  }
+}
+
+/* ---- Galeria ---- */
+.galeria-main {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-muted);
+  border: 1px solid var(--color-border);
+}
+
+.galeria-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: zoom-in;
+  transition: transform var(--motion-slow) var(--ease-out);
+  will-change: transform;
+}
+
+.galeria-main.zoom img {
+  transform: scale(1.7);
+  cursor: zoom-out;
+}
+
+.galeria-contador {
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  background: rgb(23 13 41 / 0.8);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.galeria-vazia {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--color-muted-foreground);
+}
+
+.galeria-thumbs {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.galeria-thumbs button {
+  width: 76px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 2px solid transparent;
+  opacity: 0.65;
+  transition: opacity var(--motion-fast) var(--ease-out), border-color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+  padding: 0;
+}
+
+.galeria-thumbs button:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.galeria-thumbs button.active {
+  opacity: 1;
+  border-color: var(--color-primary);
+}
+
+.galeria-thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- Infos ---- */
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.item-categoria {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  width: fit-content;
+}
+
+.item-categoria:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.item-info h1 {
+  font-size: var(--text-xl);
+  color: var(--color-foreground);
+}
+
+.item-preco {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-accent-strong);
+}
+
+.item-preco.doacao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-donation);
+  background: var(--color-donation-bg);
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  width: fit-content;
+  font-size: var(--text-lg);
+}
+
+.item-trocas {
+  display: inline-flex;
+  width: fit-content;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-primary-strong);
+  background: var(--color-primary-soft);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.item-descricao h2,
+.item-relacionados h2 {
+  font-size: var(--text-lg);
+  color: var(--color-primary-strong);
+  margin-bottom: var(--space-2);
+}
+
+.item-descricao p {
+  color: var(--color-foreground-soft);
+  white-space: pre-line;
+}
+
+/* ---- Ficha técnica ---- */
+.item-ficha {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.item-ficha dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted-foreground);
+}
+
+.item-ficha dd {
+  margin: var(--space-1) 0 0;
+  font-weight: 600;
+  color: var(--color-foreground);
+}
+
+/* ---- Vendedor ---- */
+.item-vendedor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.item-vendedor strong {
+  display: block;
+  font-family: var(--font-heading);
+  color: var(--color-foreground);
+}
+
+.item-vendedor span {
+  font-size: var(--text-sm);
+  color: var(--color-muted-foreground);
+}
+
+.item-acoes {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.item-acoes .btn-primary {
+  flex: 1;
+  min-width: 180px;
+}
+
+/* ---- Relacionados ---- */
+.item-relacionados {
+  margin-top: var(--space-16);
+}
+
+.item-relacionados-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 640px) {
+  .item-relacionados-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .item-relacionados-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ---- Empty/404 ---- */
+.item-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  padding-block: var(--space-24);
+}
+
+.item-vazio h1 {
+  font-size: var(--text-xl);
+  color: var(--color-primary-strong);
+}
+
+.item-vazio p {
+  color: var(--color-muted-foreground);
+  max-width: 34rem;
+}
+
+/* ---- Modal de contato ---- */
+.contato-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.contato-modal p {
+  color: var(--color-foreground-soft);
+}
+
+.contato-modal .btn {
+  width: 100%;
+}

@@ -1,0 +1,271 @@
+.anunciar {
+  max-width: 42rem;
+  padding-block: var(--space-8) var(--space-24);
+}
+
+.anunciar-header h1 {
+  font-size: var(--text-xl);
+  color: var(--color-primary-strong);
+}
+
+.anunciar-header p {
+  color: var(--color-muted-foreground);
+  margin-top: var(--space-2);
+  font-weight: 600;
+}
+
+/* ---- Progresso do wizard ---- */
+.wizard-progress {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-muted);
+  overflow: hidden;
+  margin-top: var(--space-6);
+}
+
+.wizard-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: var(--radius-full);
+}
+
+.wizard-steps {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0;
+  margin: var(--space-3) 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+}
+
+.wizard-steps li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.wizard-step-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-muted);
+  color: var(--color-muted-foreground);
+  font-size: 0.7rem;
+  font-weight: 700;
+  transition: background-color var(--motion-base) var(--ease-out), color var(--motion-base) var(--ease-out);
+}
+
+.wizard-steps li.current {
+  color: var(--color-primary-strong);
+}
+
+.wizard-steps li.current .wizard-step-dot {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.wizard-steps li.done .wizard-step-dot {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+
+/* ---- Banner de rascunho ---- */
+.draft-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-md);
+}
+
+.draft-banner p {
+  font-weight: 600;
+  color: var(--color-accent-strong);
+}
+
+.draft-banner > div {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ---- Painéis ---- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.wizard-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.field-label-static {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-foreground);
+}
+
+/* ---- Toggle doação/venda ---- */
+.tipo-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  background: var(--color-muted);
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+}
+
+.tipo-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+  transition:
+    background-color var(--motion-base) var(--ease-out),
+    color var(--motion-base) var(--ease-out),
+    box-shadow var(--motion-base) var(--ease-out);
+}
+
+.tipo-option.active {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.tipo-option:first-child.active {
+  color: var(--color-primary-strong);
+}
+
+.tipo-option:last-child.active {
+  color: var(--color-accent-strong);
+}
+
+/* ---- Radio cards de estado ---- */
+.estado-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.estado-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-foreground-soft);
+  text-align: left;
+  transition: border-color var(--motion-base) var(--ease-out), background-color var(--motion-base) var(--ease-out), color var(--motion-base) var(--ease-out);
+}
+
+.estado-card:hover {
+  border-color: var(--color-primary);
+}
+
+.estado-card.active {
+  border-color: var(--color-primary-strong);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+
+/* ---- Switch aceita trocas ---- */
+.switch-field {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.switch {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+  transition: background-color var(--motion-base) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.switch.on {
+  background: var(--color-primary);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--motion-base) var(--ease-out);
+}
+
+.switch.on .switch-thumb {
+  transform: translateX(22px);
+}
+
+/* ---- Preview do card ---- */
+.wizard-preview {
+  max-width: 320px;
+}
+
+.wizard-preview .card {
+  pointer-events: none;
+}
+
+/* ---- Navegação ---- */
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-6);
+}
+
+/* ---- Overlay de sucesso ---- */
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: rgb(23 13 41 / 0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+}
+
+.success-overlay p {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: #fff;
+}

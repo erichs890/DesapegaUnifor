@@ -1,0 +1,46 @@
+.toast-region {
+  position: fixed;
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(92vw, 26rem);
+  pointer-events: none;
+}
+
+/* No mobile o app tem bottom-nav de 64px — o toast sobe acima dela */
+@media (max-width: 767px) {
+  .toast-region {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid;
+}
+
+.toast-success {
+  border-left-color: var(--color-success);
+  color: var(--color-accent);
+}
+
+.toast-error {
+  border-left-color: var(--color-destructive);
+  color: var(--color-destructive);
+}
+
+.toast span {
+  color: var(--color-foreground);
+}

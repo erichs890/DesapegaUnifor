@@ -1,0 +1,89 @@
+.how {
+  padding-block: var(--space-16);
+  background: var(--color-surface);
+  border-block: 1px solid var(--color-border);
+}
+
+.how h2 {
+  font-size: var(--text-xl);
+  color: var(--color-primary-strong);
+  margin-bottom: var(--space-8);
+}
+
+.how-grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.how-step {
+  position: relative;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-background);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.how-num {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-border-strong);
+  line-height: 1;
+}
+
+.how-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+
+.how-step h3 {
+  font-size: var(--text-lg);
+  color: var(--color-foreground);
+}
+
+.how-step p {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+}
+
+.how-cta {
+  margin-top: var(--space-12);
+  padding: var(--space-8);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, var(--color-brand-deep), var(--color-primary));
+  color: var(--color-on-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.how-cta p {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .how-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .how-cta {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}

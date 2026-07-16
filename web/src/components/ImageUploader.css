@@ -1,0 +1,213 @@
+.uploader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ---- Tabs ---- */
+.uploader-tabs {
+  display: inline-flex;
+  gap: var(--space-1);
+  background: var(--color-muted);
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+.uploader-tabs button {
+  min-height: 36px;
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-muted-foreground);
+  transition: background-color var(--motion-base) var(--ease-out), color var(--motion-base) var(--ease-out);
+}
+
+.uploader-tabs button.active {
+  background: var(--color-surface);
+  color: var(--color-primary-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Dropzone ---- */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-background);
+  transition: border-color var(--motion-base) var(--ease-out), background-color var(--motion-base) var(--ease-out), transform var(--motion-base) var(--ease-out);
+}
+
+.dropzone.over {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  transform: scale(1.01);
+}
+
+.dropzone.full {
+  opacity: 0.6;
+}
+
+.dropzone-cta {
+  color: var(--color-primary-strong);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.dropzone-cta:hover {
+  color: var(--color-primary);
+}
+
+.uploader-url-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.uploader-url-row input {
+  flex: 1;
+}
+
+/* ---- Grid de thumbs ---- */
+.uploader-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: var(--space-3);
+}
+
+.uploader-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-muted);
+}
+
+.uploader-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-capa {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.thumb-actions {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(transparent, rgb(23 13 41 / 0.8));
+  padding: var(--space-2);
+}
+
+.thumb-actions button {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgb(29 25 70 / 0.92);
+  color: var(--color-foreground);
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+  transition: transform var(--motion-fast) var(--ease-out), opacity var(--motion-fast) var(--ease-out);
+}
+
+.thumb-actions button:hover {
+  transform: scale(1.1);
+}
+
+.thumb-actions button:disabled {
+  opacity: 0.35;
+  transform: none;
+}
+
+.thumb-remove {
+  color: var(--color-destructive) !important;
+}
+
+/* ---- Progresso / erro ---- */
+.thumb-progress {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: rgb(10 6 20 / 0.6);
+  color: #fff;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.thumb-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 5px;
+  background: #12CEE4;
+  transition: width var(--motion-fast) linear;
+}
+
+.thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-muted);
+}
+
+.thumb-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: rgb(185 28 28 / 0.92);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: var(--space-2);
+  text-align: center;
+}
+
+.thumb-error-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.thumb-error-actions button {
+  background: rgb(255 255 255 / 0.95);
+  color: var(--color-destructive);
+  border-radius: var(--radius-full);
+  padding: 2px var(--space-2);
+  font-size: 0.7rem;
+  font-weight: 700;
+}

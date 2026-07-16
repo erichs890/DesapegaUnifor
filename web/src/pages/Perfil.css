@@ -1,0 +1,97 @@
+.perfil {
+  max-width: 40rem;
+  padding-block: var(--space-8) var(--space-24);
+}
+
+.perfil-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.perfil-header h1 {
+  font-size: var(--text-xl);
+  color: var(--color-primary-strong);
+}
+
+.perfil-meta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  margin-top: var(--space-1);
+}
+
+.perfil-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.perfil-avatar-btn {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--motion-fast) var(--ease-out), background-color var(--motion-fast) var(--ease-out);
+}
+
+.perfil-avatar-btn:hover {
+  background: var(--color-accent-strong);
+  transform: scale(1.08);
+}
+
+.perfil-avatar-btn .spinner {
+  width: 14px;
+  height: 14px;
+}
+
+.perfil-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.perfil-stat {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.perfil-stat strong {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-primary-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.perfil-stat span {
+  font-size: var(--text-sm);
+  color: var(--color-muted-foreground);
+}
+
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.perfil-form h2 {
+  font-size: var(--text-lg);
+  color: var(--color-foreground);
+}

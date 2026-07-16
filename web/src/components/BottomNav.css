@@ -1,0 +1,54 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-nav);
+  display: flex;
+  background: rgb(29 25 70 / 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--color-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted-foreground);
+  transition: color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+  position: relative;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.94);
+}
+
+.bottom-nav-item.active {
+  color: var(--color-primary-strong);
+  font-weight: 700;
+}
+
+/* Indicador de aba ativa — pílula que desliza suavemente */
+.bottom-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  width: 28px;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+}
+
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none;
+  }
+}
