@@ -21,6 +21,9 @@ body {
   background: var(--color-background);
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  /* PWA standalone: sem "puxar" a página inteira no overscroll */
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1, h2, h3, h4 {

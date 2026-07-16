@@ -201,17 +201,21 @@ export default function Anunciar() {
     }
   }, [step, direction]);
 
+  const scrollTopo = () => window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+
   const avancar = () => {
     setTouched((t) => ({ ...t, titulo: true, categoria: true, preco: true, descricao: true, ponto: true }));
     if (!stepValid) return;
     setDirection(1);
     setStep((s) => Math.min(s + 1, 3));
     setTouched({});
+    scrollTopo();
   };
 
   const voltar = () => {
     setDirection(-1);
     setStep((s) => Math.max(s - 1, 1));
+    scrollTopo();
   };
 
   /* ---- envio ---- */
@@ -306,7 +310,7 @@ export default function Anunciar() {
         {STEP_TITLES.map((title, i) => (
           <li key={title} className={i + 1 === step ? 'current' : i + 1 < step ? 'done' : ''}>
             <span className="wizard-step-dot">{i + 1 < step ? '✓' : i + 1}</span>
-            {title}
+            <span className="wizard-step-label">{title}</span>
           </li>
         ))}
       </ol>
@@ -355,6 +359,7 @@ export default function Anunciar() {
                     id="preco"
                     name="preco"
                     type="text"
+                    enterKeyHint="next"
                     inputMode="numeric"
                     placeholder="R$ 0,00"
                     value={precoBRL(form.precoCentavos)}
@@ -380,6 +385,7 @@ export default function Anunciar() {
                   id="titulo"
                   name="titulo"
                   type="text"
+                  enterKeyHint="next"
                   maxLength={80}
                   placeholder="Ex: Cálculo Vol. 1 — James Stewart"
                   value={form.titulo}
@@ -496,6 +502,7 @@ export default function Anunciar() {
                   id="ponto"
                   name="ponto"
                   type="text"
+                  enterKeyHint="done"
                   maxLength={80}
                   placeholder="Ex: Biblioteca central"
                   value={form.ponto}

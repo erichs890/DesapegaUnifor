@@ -1,4 +1,7 @@
+import { useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
+import gsap from 'gsap';
+import { prefersReducedMotion } from '../hooks/useReducedMotion';
 import './BottomNav.css';
 
 const items = [
@@ -37,10 +40,40 @@ const items = [
   },
 ];
 
-/** Navegação inferior — só aparece em telas < 768px (experiência de app). */
+/**
+ * Navegação inferior — só aparece em telas < 768px (experiência de app).
+ * Esconde ao rolar para baixo e reaparece ao rolar para cima (padrão de
+ * app nativo: mais tela para o conteúdo durante a leitura).
+ */
 export function BottomNav() {
+  const navRef = useRef<HTMLElement>(null);
+  const lastY = useRef(0);
+  const hidden = useRef(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const nav = navRef.current;
+      if (!nav) return;
+      const y = window.scrollY;
+      const goingDown = y > lastY.current;
+      lastY.current = y;
+
+      const shouldHide = goingDown && y > 120;
+      if (shouldHide === hidden.current) return;
+      hidden.current = shouldHide;
+
+      if (prefersReducedMotion()) {
+        nav.style.transform = shouldHide ? 'translateY(110%)' : 'translateY(0)';
+      } else {
+        gsap.to(nav, { yPercent: shouldHide ? 110 : 0, duration: 0.25, ease: 'power2.out', overwrite: true });
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <nav className="bottom-nav" aria-label="Navegação do aplicativo">
+    <nav className="bottom-nav" aria-label="Navegação do aplicativo" ref={navRef}>
       {items.map((item) => (
         <NavLink
           key={item.to}

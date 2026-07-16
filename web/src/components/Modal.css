@@ -18,6 +18,29 @@
   overflow: hidden;
 }
 
+/* Mobile: o modal vira bottom sheet — desliza de baixo, ocupa a largura
+   toda e respeita a safe area (padrão de app nativo) */
+@media (max-width: 640px) {
+  .modal-scrim {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal-panel {
+    max-width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .modal-panel::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--color-border-strong);
+    margin: var(--space-2) auto 0;
+  }
+}
+
 .modal-header {
   display: flex;
   align-items: center;

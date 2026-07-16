@@ -69,6 +69,34 @@
 .navbar-cta {
   font-size: var(--text-sm);
   padding: var(--space-2) var(--space-4);
+  white-space: nowrap; /* nunca quebrar em duas linhas */
+  flex-shrink: 0;
+}
+
+/* Telas estreitas: CTA vira botão circular só com o ícone (o rótulo
+   fica no aria-label) — o logo nunca é sobreposto */
+@media (max-width: 519px) {
+  .navbar-cta-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .navbar-cta {
+    width: var(--touch-target);
+    height: var(--touch-target);
+    padding: 0;
+    border-radius: 50%;
+  }
+  .navbar-logo {
+    min-width: 0;
+  }
+  .navbar-logo span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .navbar-entrar {

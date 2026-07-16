@@ -147,6 +147,14 @@
   transform: none;
 }
 
+/* Touch: alvos maiores (sem mouse não há precisão de ponteiro) */
+@media (hover: none) {
+  .thumb-actions button {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 .thumb-remove {
   color: var(--color-destructive) !important;
 }

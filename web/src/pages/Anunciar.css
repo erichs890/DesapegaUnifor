@@ -75,6 +75,18 @@
   color: var(--color-primary-strong);
 }
 
+/* Telas estreitas: só os círculos numerados (o título da etapa já
+   aparece no cabeçalho "Etapa X de 3 — …") */
+@media (max-width: 419px) {
+  .wizard-step-label {
+    display: none;
+  }
+  .wizard-steps {
+    justify-content: center;
+    gap: var(--space-6);
+  }
+}
+
 /* ---- Banner de rascunho ---- */
 .draft-banner {
   display: flex;
@@ -169,6 +181,13 @@
   gap: var(--space-2);
 }
 
+/* 320-360px: uma coluna — "Com marcas de uso" não cabe em meia tela */
+@media (max-width: 379px) {
+  .estado-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .estado-card {
   display: flex;
   align-items: center;
@@ -248,6 +267,19 @@
   gap: var(--space-3);
   border-top: 1px solid var(--color-border);
   padding-top: var(--space-6);
+}
+
+/* Mobile: navegação do wizard gruda logo acima da bottom-nav —
+   "Continuar"/"Publicar" sempre ao alcance do polegar */
+@media (max-width: 767px) {
+  .wizard-nav {
+    position: sticky;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    background: var(--color-surface);
+    padding-bottom: var(--space-3);
+    margin-inline: calc(var(--space-6) * -1);
+    padding-inline: var(--space-6);
+  }
 }
 
 /* ---- Overlay de sucesso ---- */

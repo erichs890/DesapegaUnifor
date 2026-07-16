@@ -252,6 +252,39 @@
   min-width: 180px;
 }
 
+/* Mobile: barra de ação fixa acima da bottom-nav — o CTA principal
+   fica sempre ao alcance do polegar, em qualquer ponto da rolagem */
+@media (max-width: 767px) {
+  .item-acoes {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    z-index: var(--z-nav);
+    padding: var(--space-3) var(--space-4);
+    background: rgb(29 25 70 / 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--color-border);
+    flex-wrap: nowrap;
+  }
+  .item-acoes .btn {
+    white-space: nowrap;
+    font-size: var(--text-sm);
+    padding-inline: var(--space-4);
+  }
+  .item-acoes .btn-primary {
+    min-width: 0;
+  }
+  .item-acoes .btn-secondary {
+    flex-shrink: 0;
+  }
+  /* espaço para o conteúdo não terminar escondido atrás da barra */
+  .item {
+    padding-bottom: calc(var(--space-24) + 72px);
+  }
+}
+
 /* ---- Relacionados ---- */
 .item-relacionados {
   margin-top: var(--space-16);

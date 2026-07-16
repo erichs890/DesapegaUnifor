@@ -25,7 +25,13 @@ export function Modal({ open, onClose, title, children }: Props) {
     const panel = panelRef.current;
 
     if (panel && !prefersReducedMotion()) {
-      animate(panel, { opacity: [0, 1], scale: [0.92, 1], translateY: [12, 0], duration: 240, ease: 'outCubic' });
+      const isSheet = window.matchMedia('(max-width: 640px)').matches;
+      if (isSheet) {
+        // bottom sheet: desliza de baixo (continuidade espacial do gesto mobile)
+        animate(panel, { translateY: ['100%', '0%'], duration: 280, ease: 'outCubic' });
+      } else {
+        animate(panel, { opacity: [0, 1], scale: [0.92, 1], translateY: [12, 0], duration: 240, ease: 'outCubic' });
+      }
     }
     panel?.querySelector<HTMLElement>('button, a, input, [tabindex]')?.focus();
 
