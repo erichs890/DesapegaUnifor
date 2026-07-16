@@ -3,6 +3,7 @@ import { updateMe, uploadImagem, ApiError } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 import { Avatar } from '../components/UserMenu';
+import { parseDbDate } from '../lib/format';
 import { CAMPI } from '../lib/types';
 import './Perfil.css';
 
@@ -22,7 +23,7 @@ export default function Perfil() {
   const nomeError = nome.trim().length < 2 ? 'O nome precisa de pelo menos 2 caracteres.' : undefined;
   const matriculaError =
     matricula !== '' && !/^\d{7}$/.test(matricula) ? 'A matrícula tem exatamente 7 números.' : undefined;
-  const membroDesde = new Date(`${user.criado_em.replace(' ', 'T')}Z`).toLocaleDateString('pt-BR', {
+  const membroDesde = parseDbDate(user.criado_em).toLocaleDateString('pt-BR', {
     month: 'long',
     year: 'numeric',
   });

@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express';
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
-import { db, publicUser, type Usuario } from './db.js';
+import { q, one, publicUser, type Usuario } from './db.js';
 import {
   signToken,
   requireAuth,
@@ -13,32 +13,30 @@ import {
 
 export const authRouter = Router();
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const EMAIL_UNIFOR_RE = /^[^\s@]+@edu\.unifor\.br$/i;
 const MATRICULA_RE = /^\d{7}$/;
 
+/** Sanitiza: remove caracteres de controle, apara e limita tamanho. */
 const clean = (v: unknown, max = 120): string =>
   typeof v === 'string' ? v.replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, max) : '';
 
-/** Dados do próprio usuário: público + matrícula (nunca exposta a terceiros). */
-function ownUser(u: Usuario) {
-  return { ...publicUser(u), matricula: u.matricula, stats: userStats(u.id) };
+async function userStats(userId: number) {
+  const row = await one<{ anuncios: number; doacoes: number }>(
+    `select count(*)::bigint as anuncios,
+            count(*) filter (where tipo = 'doacao')::bigint as doacoes
+     from anuncios where usuario_id = $1`,
+    [userId]
+  );
+  return { anuncios: row?.anuncios ?? 0, doacoes: row?.doacoes ?? 0 };
 }
 
-function userStats(userId: number) {
-  const anuncios = (
-    db.prepare('SELECT COUNT(*) AS n FROM anuncios WHERE usuario_id = ?').get(userId) as { n: number }
-  ).n;
-  const doacoes = (
-    db.prepare("SELECT COUNT(*) AS n FROM anuncios WHERE usuario_id = ? AND tipo = 'doacao'").get(userId) as {
-      n: number;
-    }
-  ).n;
-  return { anuncios, doacoes };
+/** Dados do próprio usuário: público + matrícula (nunca exposta a terceiros). */
+async function ownUser(u: Usuario) {
+  return { ...publicUser(u), matricula: u.matricula, stats: await userStats(u.id) };
 }
 
 // POST /api/auth/registro
-authRouter.post('/registro', (req, res: Response) => {
+authRouter.post('/registro', async (req, res: Response) => {
   const body = (req.body ?? {}) as Record<string, unknown>;
   const errors: Record<string, string> = {};
 
@@ -70,14 +68,14 @@ authRouter.post('/registro', (req, res: Response) => {
     return res.status(422).json({ error: 'Confira os campos destacados.', fields: errors });
   }
 
-  const exists = db.prepare('SELECT id FROM usuarios WHERE email = ?').get(email);
+  const exists = await one('select id from usuarios where lower(email) = $1', [email]);
   if (exists) {
     return res.status(409).json({
       error: 'Já existe uma conta com esse email.',
       fields: { email: 'Já existe uma conta com esse email — tente entrar.' },
     });
   }
-  const matriculaExists = db.prepare('SELECT id FROM usuarios WHERE matricula = ?').get(matricula);
+  const matriculaExists = await one('select id from usuarios where matricula = $1', [matricula]);
   if (matriculaExists) {
     return res.status(409).json({
       error: 'Essa matrícula já está cadastrada.',
@@ -86,16 +84,17 @@ authRouter.post('/registro', (req, res: Response) => {
   }
 
   const senha_hash = bcrypt.hashSync(senha, 12);
-  const info = db
-    .prepare('INSERT INTO usuarios (nome, email, senha_hash, curso, campus, matricula) VALUES (?, ?, ?, ?, ?, ?)')
-    .run(nome, email, senha_hash, curso, campus, matricula);
-
-  const user = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(info.lastInsertRowid as number) as unknown as Usuario;
-  res.status(201).json({ token: signToken(user.id), usuario: ownUser(user) });
+  const rows = await q<Usuario>(
+    `insert into usuarios (nome, email, senha_hash, curso, campus, matricula)
+     values ($1, $2, $3, $4, $5, $6) returning *`,
+    [nome, email, senha_hash, curso, campus, matricula]
+  );
+  const user = rows[0];
+  res.status(201).json({ token: signToken(user.id), usuario: await ownUser(user) });
 });
 
 // POST /api/auth/login
-authRouter.post('/login', (req, res: Response) => {
+authRouter.post('/login', async (req, res: Response) => {
   const body = (req.body ?? {}) as Record<string, unknown>;
   const email = clean(body.email, 160).toLowerCase();
   const senha = typeof body.senha === 'string' ? body.senha : '';
@@ -111,24 +110,20 @@ authRouter.post('/login', (req, res: Response) => {
   }
   registerLoginAttempt(email);
 
-  const user = db.prepare('SELECT * FROM usuarios WHERE email = ?').get(email) as unknown as
-    | Usuario
-    | undefined;
+  const user = await one<Usuario>('select * from usuarios where lower(email) = $1', [email]);
   // mesma mensagem para email inexistente e senha errada (não vazar contas)
   if (!user || !bcrypt.compareSync(senha, user.senha_hash)) {
     return res.status(401).json({ error: 'Email ou senha incorretos. Confira e tente de novo.' });
   }
 
   clearLoginAttempts(email);
-  res.json({ token: signToken(user.id), usuario: ownUser(user) });
+  res.json({ token: signToken(user.id), usuario: await ownUser(user) });
 });
 
 /**
  * POST /api/auth/google — login/cadastro com Google Identity Services.
- * O front envia o ID token (credential) do GIS; validamos contra o endpoint
- * tokeninfo do Google (assinatura + expiração verificadas pelo Google) e
- * conferimos o `aud` com o nosso Client ID. Volume baixo → tokeninfo é
- * suficiente; em escala usaríamos verificação local via JWKS.
+ * Validamos o ID token no endpoint tokeninfo do Google (assinatura +
+ * expiração) e conferimos o `aud` com o nosso Client ID.
  */
 authRouter.post('/google', async (req, res: Response) => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -170,43 +165,39 @@ authRouter.post('/google', async (req, res: Response) => {
   const nome = clean(info.name, 80) || email.split('@')[0];
   const avatar = typeof info.picture === 'string' && /^https:\/\//.test(info.picture) ? info.picture : null;
 
-  let user = db.prepare('SELECT * FROM usuarios WHERE google_id = ?').get(googleId) as unknown as
-    | Usuario
-    | undefined;
+  let user = await one<Usuario>('select * from usuarios where google_id = $1', [googleId]);
 
   if (!user) {
     // vincula a uma conta existente com o mesmo email (verificado pelo Google)
-    const byEmail = db.prepare('SELECT * FROM usuarios WHERE email = ?').get(email) as unknown as
-      | Usuario
-      | undefined;
+    const byEmail = await one<Usuario>('select * from usuarios where lower(email) = $1', [email]);
     if (byEmail) {
-      db.prepare('UPDATE usuarios SET google_id = ?, avatar_url = COALESCE(avatar_url, ?) WHERE id = ?').run(
-        googleId,
-        avatar,
-        byEmail.id
+      const rows = await q<Usuario>(
+        'update usuarios set google_id = $1, avatar_url = coalesce(avatar_url, $2) where id = $3 returning *',
+        [googleId, avatar, byEmail.id]
       );
-      user = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(byEmail.id) as unknown as Usuario;
+      user = rows[0];
     } else {
       // conta nova: sem senha utilizável (hash de bytes aleatórios)
       const senha_hash = bcrypt.hashSync(crypto.randomUUID() + crypto.randomUUID(), 12);
-      const created = db
-        .prepare('INSERT INTO usuarios (nome, email, senha_hash, avatar_url, google_id) VALUES (?, ?, ?, ?, ?)')
-        .run(nome, email, senha_hash, avatar, googleId);
-      user = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(created.lastInsertRowid as number) as unknown as Usuario;
+      const rows = await q<Usuario>(
+        `insert into usuarios (nome, email, senha_hash, avatar_url, google_id)
+         values ($1, $2, $3, $4, $5) returning *`,
+        [nome, email, senha_hash, avatar, googleId]
+      );
+      user = rows[0];
     }
   }
 
-  res.json({ token: signToken(user.id), usuario: ownUser(user) });
+  res.json({ token: signToken(user.id), usuario: await ownUser(user) });
 });
 
 // GET /api/auth/me
-authRouter.get('/me', requireAuth, (req: AuthRequest, res: Response) => {
-  const user = req.user!;
-  res.json({ usuario: ownUser(user) });
+authRouter.get('/me', requireAuth, async (req: AuthRequest, res: Response) => {
+  res.json({ usuario: await ownUser(req.user!) });
 });
 
-// PATCH /api/auth/me — editar nome/curso/campus/avatar
-authRouter.patch('/me', requireAuth, (req: AuthRequest, res: Response) => {
+// PATCH /api/auth/me — editar nome/curso/campus/avatar/matrícula
+authRouter.patch('/me', requireAuth, async (req: AuthRequest, res: Response) => {
   const user = req.user!;
   const body = (req.body ?? {}) as Record<string, unknown>;
   const errors: Record<string, string> = {};
@@ -231,7 +222,7 @@ authRouter.patch('/me', requireAuth, (req: AuthRequest, res: Response) => {
     if (m === '') matricula = null;
     else if (!MATRICULA_RE.test(m)) errors.matricula = 'A matrícula tem exatamente 7 números (só dígitos).';
     else {
-      const taken = db.prepare('SELECT id FROM usuarios WHERE matricula = ? AND id != ?').get(m, user.id);
+      const taken = await one('select id from usuarios where matricula = $1 and id != $2', [m, user.id]);
       if (taken) errors.matricula = 'Essa matrícula já está cadastrada em outra conta.';
       else matricula = m;
     }
@@ -241,14 +232,10 @@ authRouter.patch('/me', requireAuth, (req: AuthRequest, res: Response) => {
     return res.status(422).json({ error: 'Confira os campos destacados.', fields: errors });
   }
 
-  db.prepare('UPDATE usuarios SET nome = ?, curso = ?, campus = ?, avatar_url = ?, matricula = ? WHERE id = ?').run(
-    nome,
-    curso,
-    campus,
-    avatar_url,
-    matricula,
-    user.id
+  const rows = await q<Usuario>(
+    `update usuarios set nome = $1, curso = $2, campus = $3, avatar_url = $4, matricula = $5
+     where id = $6 returning *`,
+    [nome, curso, campus, avatar_url, matricula, user.id]
   );
-  const updated = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(user.id) as unknown as Usuario;
-  res.json({ usuario: ownUser(updated) });
+  res.json({ usuario: await ownUser(rows[0]) });
 });

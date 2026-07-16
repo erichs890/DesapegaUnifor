@@ -4,8 +4,7 @@ import cors from 'cors';
 import { router } from './routes.js';
 import { authRouter } from './routes-auth.js';
 import { uploadRouter } from './upload.js';
-import { uploadsDir } from './db.js';
-import { seedIfEmpty } from './seed.js';
+import { uploadsDir, pool } from './db.js';
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
@@ -46,8 +45,16 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: 'Erro interno do servidor.' });
 });
 
-seedIfEmpty();
-
-app.listen(PORT, () => {
-  console.log(`✅ API Desapego rodando em http://localhost:${PORT}/api`);
-});
+// Valida a conexão com o Supabase antes de aceitar requisições
+pool
+  .query('select 1')
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ API DesapegaUnifor rodando em http://localhost:${PORT}/api (banco: Supabase)`);
+    });
+  })
+  .catch((err: Error) => {
+    console.error('❌ Não foi possível conectar ao Supabase. Confira DATABASE_URL no server/.env.');
+    console.error(err.message);
+    process.exit(1);
+  });

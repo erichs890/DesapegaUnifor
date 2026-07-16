@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
-import { db, type Usuario } from './db.js';
+import { one, type Usuario } from './db.js';
 
 /**
  * Segredo do JWT: em produção vem de env; em dev usa um valor fixo para o
@@ -17,25 +17,22 @@ export function signToken(userId: number): string {
   return jwt.sign({ sub: String(userId) }, JWT_SECRET, { expiresIn: TOKEN_TTL });
 }
 
-function userFromHeader(req: Request): Usuario | null {
+async function userFromHeader(req: Request): Promise<Usuario | null> {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) return null;
   try {
     const payload = jwt.verify(header.slice(7), JWT_SECRET);
     const sub = typeof payload === 'object' && payload.sub ? Number(payload.sub) : NaN;
     if (!Number.isInteger(sub)) return null;
-    const user = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(sub) as unknown as
-      | Usuario
-      | undefined;
-    return user ?? null;
+    return await one<Usuario>('select * from usuarios where id = $1', [sub]);
   } catch {
     return null;
   }
 }
 
 /** 401 se não houver token válido; popula req.user. */
-export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
-  const user = userFromHeader(req);
+export async function requireAuth(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  const user = await userFromHeader(req).catch(() => null);
   if (!user) {
     res.status(401).json({ error: 'Você precisa estar logado. Entre na sua conta e tente de novo.' });
     return;
@@ -45,8 +42,8 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
 }
 
 /** Popula req.user se houver token válido; segue em frente se não houver. */
-export function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction): void {
-  const user = userFromHeader(req);
+export async function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction): Promise<void> {
+  const user = await userFromHeader(req).catch(() => null);
   if (user) req.user = user;
   next();
 }

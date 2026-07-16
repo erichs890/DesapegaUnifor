@@ -1,5 +1,16 @@
 import { Router, type Response } from 'express';
-import { db, CATEGORIAS, CAMPI, ESTADOS_CONSERVACAO, publicUser, type Anuncio, type AnuncioImagem, type Usuario } from './db.js';
+import {
+  q,
+  one,
+  pool,
+  CATEGORIAS,
+  CAMPI,
+  ESTADOS_CONSERVACAO,
+  publicUser,
+  type Anuncio,
+  type AnuncioImagem,
+  type Usuario,
+} from './db.js';
 import { validateAnuncio, type AnuncioInput } from './validate.js';
 import { requireAuth, optionalAuth, type AuthRequest } from './auth.js';
 import { deleteLocalImages } from './upload.js';
@@ -14,54 +25,70 @@ interface AnuncioComVendedor extends Anuncio {
 }
 
 const LIST_SELECT = `
-  SELECT a.*, u.nome AS vendedor_nome, u.avatar_url AS vendedor_avatar
-  FROM anuncios a
-  JOIN usuarios u ON u.id = a.usuario_id
+  select a.*, u.nome as vendedor_nome, u.avatar_url as vendedor_avatar
+  from anuncios a
+  join usuarios u on u.id = a.usuario_id
 `;
 
-function imagensDe(anuncioId: number): AnuncioImagem[] {
-  return db
-    .prepare('SELECT * FROM anuncio_imagens WHERE anuncio_id = ? ORDER BY ordem ASC, id ASC')
-    .all(anuncioId) as unknown as AnuncioImagem[];
-}
-
-function salvarImagens(anuncioId: number, urls: string[]): void {
-  const insert = db.prepare(
-    'INSERT INTO anuncio_imagens (anuncio_id, url, ordem, capa) VALUES (?, ?, ?, ?)'
+function imagensDe(anuncioId: number): Promise<AnuncioImagem[]> {
+  return q<AnuncioImagem>(
+    'select * from anuncio_imagens where anuncio_id = $1 order by ordem asc, id asc',
+    [anuncioId]
   );
-  urls.forEach((url, i) => insert.run(anuncioId, url, i, i === 0 ? 1 : 0));
-  db.prepare('UPDATE anuncios SET imagem_url = ? WHERE id = ?').run(urls[0] ?? null, anuncioId);
 }
 
-function persistir(data: AnuncioInput, id: number | null, userId: number): Anuncio {
-  if (id === null) {
-    const info = db
-      .prepare(
-        `INSERT INTO anuncios (titulo, descricao, categoria, tipo, preco, estado_conservacao,
+/** Cria ou atualiza o anúncio + imagens numa transação. */
+async function persistir(data: AnuncioInput, id: number | null, userId: number): Promise<Anuncio> {
+  const client = await pool.connect();
+  try {
+    await client.query('begin');
+
+    if (id === null) {
+      const created = await client.query(
+        `insert into anuncios (titulo, descricao, categoria, tipo, preco, estado_conservacao,
                                campus, ponto_encontro, aceita_trocas, usuario_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      )
-      .run(
-        data.titulo, data.descricao, data.categoria, data.tipo, data.preco,
-        data.estado_conservacao, data.campus, data.ponto_encontro, data.aceita_trocas, userId
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning id`,
+        [
+          data.titulo, data.descricao, data.categoria, data.tipo, data.preco,
+          data.estado_conservacao, data.campus, data.ponto_encontro, data.aceita_trocas, userId,
+        ]
       );
-    id = Number(info.lastInsertRowid);
-  } else {
-    // edição: apaga do disco as imagens locais que saíram da lista
-    const antigas = imagensDe(id).map((i) => i.url);
-    const removidas = antigas.filter((u) => !data.imagens.includes(u));
-    deleteLocalImages(removidas);
-    db.prepare('DELETE FROM anuncio_imagens WHERE anuncio_id = ?').run(id);
-    db.prepare(
-      `UPDATE anuncios SET titulo = ?, descricao = ?, categoria = ?, tipo = ?, preco = ?,
-        estado_conservacao = ?, campus = ?, ponto_encontro = ?, aceita_trocas = ? WHERE id = ?`
-    ).run(
-      data.titulo, data.descricao, data.categoria, data.tipo, data.preco,
-      data.estado_conservacao, data.campus, data.ponto_encontro, data.aceita_trocas, id
-    );
+      id = created.rows[0].id as number;
+    } else {
+      // edição: apaga do disco as imagens locais que saíram da lista
+      const antigas = await client.query('select url from anuncio_imagens where anuncio_id = $1', [id]);
+      const removidas = (antigas.rows as { url: string }[])
+        .map((r) => r.url)
+        .filter((u) => !data.imagens.includes(u));
+      deleteLocalImages(removidas);
+      await client.query('delete from anuncio_imagens where anuncio_id = $1', [id]);
+      await client.query(
+        `update anuncios set titulo = $1, descricao = $2, categoria = $3, tipo = $4, preco = $5,
+          estado_conservacao = $6, campus = $7, ponto_encontro = $8, aceita_trocas = $9 where id = $10`,
+        [
+          data.titulo, data.descricao, data.categoria, data.tipo, data.preco,
+          data.estado_conservacao, data.campus, data.ponto_encontro, data.aceita_trocas, id,
+        ]
+      );
+    }
+
+    for (let i = 0; i < data.imagens.length; i++) {
+      await client.query(
+        'insert into anuncio_imagens (anuncio_id, url, ordem, capa) values ($1, $2, $3, $4)',
+        [id, data.imagens[i], i, i === 0 ? 1 : 0]
+      );
+    }
+    await client.query('update anuncios set imagem_url = $1 where id = $2', [data.imagens[0] ?? null, id]);
+
+    await client.query('commit');
+  } catch (err) {
+    await client.query('rollback');
+    throw err;
+  } finally {
+    client.release();
   }
-  salvarImagens(id, data.imagens);
-  return db.prepare('SELECT * FROM anuncios WHERE id = ?').get(id) as unknown as Anuncio;
+
+  return (await one<Anuncio>('select * from anuncios where id = $1', [id]))!;
 }
 
 /* ---------------- rotas ---------------- */
@@ -72,99 +99,101 @@ router.get('/categorias', (_req, res: Response) => {
 });
 
 // GET /api/anuncios?categoria=&tipo=&q=&usuario=me&sort=&page=&per_page=
-router.get('/anuncios', optionalAuth, (req: AuthRequest, res: Response) => {
-  const { categoria, tipo, q, usuario, sort } = req.query;
+router.get('/anuncios', optionalAuth, async (req: AuthRequest, res: Response) => {
+  const { categoria, tipo, q: busca, usuario, sort } = req.query;
   const where: string[] = [];
   const params: (string | number)[] = [];
+  const arg = (v: string | number) => {
+    params.push(v);
+    return `$${params.length}`;
+  };
 
   if (typeof categoria === 'string' && categoria !== '') {
-    where.push('a.categoria = ?');
-    params.push(categoria);
+    where.push(`a.categoria = ${arg(categoria)}`);
   }
   if (tipo === 'doacao' || tipo === 'venda') {
-    where.push('a.tipo = ?');
-    params.push(tipo);
+    where.push(`a.tipo = ${arg(tipo)}`);
   }
-  if (typeof q === 'string' && q.trim() !== '') {
-    where.push('(a.titulo LIKE ? OR a.descricao LIKE ?)');
-    const like = `%${q.trim().slice(0, 80)}%`;
-    params.push(like, like);
+  if (typeof busca === 'string' && busca.trim() !== '') {
+    const like = `%${busca.trim().slice(0, 80)}%`;
+    where.push(`(a.titulo ilike ${arg(like)} or a.descricao ilike ${arg(like)})`);
   }
   if (typeof usuario === 'string' && usuario !== '') {
     if (usuario === 'me') {
       if (!req.user) {
         return res.status(401).json({ error: 'Entre na sua conta para ver os seus anúncios.' });
       }
-      where.push('a.usuario_id = ?');
-      params.push(req.user.id);
+      where.push(`a.usuario_id = ${arg(req.user.id)}`);
     } else {
-      where.push('a.usuario_id = ?');
-      params.push(Number(usuario) || 0);
+      where.push(`a.usuario_id = ${arg(Number(usuario) || 0)}`);
     }
   }
 
   const orderBy =
     sort === 'preco_asc'
-      ? 'a.tipo ASC, a.preco ASC' // doações (preço nulo) primeiro, depois mais barato
+      ? 'a.tipo asc, a.preco asc' // doações (preço nulo) primeiro, depois mais barato
       : sort === 'preco_desc'
-        ? 'a.preco DESC NULLS LAST'
-        : 'a.criado_em DESC, a.id DESC';
+        ? 'a.preco desc nulls last'
+        : 'a.criado_em desc, a.id desc';
 
   const perPage = Math.min(Math.max(Number(req.query.per_page) || 12, 1), 48);
   const page = Math.max(Number(req.query.page) || 1, 1);
-  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+  const whereSql = where.length ? `where ${where.join(' and ')}` : '';
 
-  const total = (
-    db.prepare(`SELECT COUNT(*) AS n FROM anuncios a ${whereSql}`).all(...params)[0] as { n: number }
-  ).n;
+  const totalRow = await one<{ n: number }>(
+    `select count(*)::bigint as n from anuncios a ${whereSql}`,
+    params
+  );
+  const total = totalRow?.n ?? 0;
 
-  const anuncios = db
-    .prepare(`${LIST_SELECT} ${whereSql} ORDER BY ${orderBy} LIMIT ? OFFSET ?`)
-    .all(...params, perPage, (page - 1) * perPage) as unknown as AnuncioComVendedor[];
+  const anuncios = await q<AnuncioComVendedor>(
+    `${LIST_SELECT} ${whereSql} order by ${orderBy} limit ${arg(perPage)} offset ${arg((page - 1) * perPage)}`,
+    params
+  );
 
   res.json({ anuncios, total, page, per_page: perPage, has_more: page * perPage < total });
 });
 
 // GET /api/anuncios/:id — detalhe: imagens + vendedor + relacionados
-router.get('/anuncios/:id', (req, res: Response) => {
+router.get('/anuncios/:id', async (req, res: Response) => {
   const id = Number(req.params.id);
-  const anuncio = db.prepare('SELECT * FROM anuncios WHERE id = ?').get(id) as unknown as
-    | Anuncio
-    | undefined;
+  if (!Number.isInteger(id)) return res.status(404).json({ error: 'Anúncio não encontrado.' });
+
+  const anuncio = await one<Anuncio>('select * from anuncios where id = $1', [id]);
   if (!anuncio) return res.status(404).json({ error: 'Anúncio não encontrado.' });
 
-  const dono = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(anuncio.usuario_id) as unknown as Usuario;
-  const totalDoVendedor = (
-    db.prepare('SELECT COUNT(*) AS n FROM anuncios WHERE usuario_id = ?').get(dono.id) as { n: number }
-  ).n;
+  const dono = (await one<Usuario>('select * from usuarios where id = $1', [anuncio.usuario_id]))!;
+  const totalRow = await one<{ n: number }>(
+    'select count(*)::bigint as n from anuncios where usuario_id = $1',
+    [dono.id]
+  );
 
-  const relacionados = db
-    .prepare(`${LIST_SELECT} WHERE a.categoria = ? AND a.id != ? ORDER BY a.criado_em DESC LIMIT 4`)
-    .all(anuncio.categoria, id) as unknown as AnuncioComVendedor[];
+  const relacionados = await q<AnuncioComVendedor>(
+    `${LIST_SELECT} where a.categoria = $1 and a.id != $2 order by a.criado_em desc limit 4`,
+    [anuncio.categoria, id]
+  );
 
   res.json({
-    anuncio: { ...anuncio, imagens: imagensDe(id) },
-    vendedor: { ...publicUser(dono), total_anuncios: totalDoVendedor },
+    anuncio: { ...anuncio, imagens: await imagensDe(id) },
+    vendedor: { ...publicUser(dono), total_anuncios: totalRow?.n ?? 0 },
     relacionados,
   });
 });
 
 // POST /api/anuncios — autenticado; dono = quem publica
-router.post('/anuncios', requireAuth, (req: AuthRequest, res: Response) => {
+router.post('/anuncios', requireAuth, async (req: AuthRequest, res: Response) => {
   const result = validateAnuncio(req.body);
   if (!result.ok || !result.data) {
     return res.status(422).json({ error: 'Confira os campos destacados.', fields: result.errors });
   }
-  const anuncio = persistir(result.data, null, req.user!.id);
-  res.status(201).json({ anuncio: { ...anuncio, imagens: imagensDe(anuncio.id) } });
+  const anuncio = await persistir(result.data, null, req.user!.id);
+  res.status(201).json({ anuncio: { ...anuncio, imagens: await imagensDe(anuncio.id) } });
 });
 
 // PATCH /api/anuncios/:id — apenas o dono edita
-router.patch('/anuncios/:id', requireAuth, (req: AuthRequest, res: Response) => {
+router.patch('/anuncios/:id', requireAuth, async (req: AuthRequest, res: Response) => {
   const id = Number(req.params.id);
-  const existente = db.prepare('SELECT * FROM anuncios WHERE id = ?').get(id) as unknown as
-    | Anuncio
-    | undefined;
+  const existente = await one<Anuncio>('select * from anuncios where id = $1', [id]);
   if (!existente) return res.status(404).json({ error: 'Anúncio não encontrado.' });
   if (existente.usuario_id !== req.user!.id) {
     return res.status(403).json({ error: 'Você só pode editar os seus próprios anúncios.' });
@@ -174,39 +203,40 @@ router.patch('/anuncios/:id', requireAuth, (req: AuthRequest, res: Response) => 
   if (!result.ok || !result.data) {
     return res.status(422).json({ error: 'Confira os campos destacados.', fields: result.errors });
   }
-  const anuncio = persistir(result.data, id, req.user!.id);
-  res.json({ anuncio: { ...anuncio, imagens: imagensDe(id) } });
+  const anuncio = await persistir(result.data, id, req.user!.id);
+  res.json({ anuncio: { ...anuncio, imagens: await imagensDe(id) } });
 });
 
 // DELETE /api/anuncios/:id — apenas o dono; remove imagens do disco
-router.delete('/anuncios/:id', requireAuth, (req: AuthRequest, res: Response) => {
+router.delete('/anuncios/:id', requireAuth, async (req: AuthRequest, res: Response) => {
   const id = Number(req.params.id);
-  const anuncio = db.prepare('SELECT * FROM anuncios WHERE id = ?').get(id) as unknown as
-    | Anuncio
-    | undefined;
+  const anuncio = await one<Anuncio>('select * from anuncios where id = $1', [id]);
   if (!anuncio) return res.status(404).json({ error: 'Anúncio não encontrado.' });
   if (anuncio.usuario_id !== req.user!.id) {
     return res.status(403).json({ error: 'Você só pode remover os seus próprios anúncios.' });
   }
 
-  deleteLocalImages(imagensDe(id).map((i) => i.url));
-  db.prepare('DELETE FROM anuncios WHERE id = ?').run(id); // CASCADE apaga as imagens
+  deleteLocalImages((await imagensDe(id)).map((i) => i.url));
+  await q('delete from anuncios where id = $1', [id]); // CASCADE apaga as imagens
   res.json({ deleted: true, id });
 });
 
 // GET /api/stats — estatísticas para a landing
-router.get('/stats', (_req, res: Response) => {
-  const total = (db.prepare('SELECT COUNT(*) AS n FROM anuncios').get() as { n: number }).n;
-  const doacoes = (db.prepare("SELECT COUNT(*) AS n FROM anuncios WHERE tipo = 'doacao'").get() as { n: number }).n;
-  const usuarios = (db.prepare('SELECT COUNT(*) AS n FROM usuarios').get() as { n: number }).n;
-  const co2kg = Math.round(total * 2.3); // estimativa: ~2,3kg de CO2 por item que circula
+router.get('/stats', async (_req, res: Response) => {
+  const row = await one<{ total: number; doacoes: number; usuarios: number }>(
+    `select
+       (select count(*)::bigint from anuncios) as total,
+       (select count(*)::bigint from anuncios where tipo = 'doacao') as doacoes,
+       (select count(*)::bigint from usuarios) as usuarios`
+  );
+  const total = row?.total ?? 0;
 
   res.json({
     stats: {
       itens_anunciados: total,
-      doacoes,
-      estudantes_ativos: usuarios,
-      co2_evitado_kg: co2kg,
+      doacoes: row?.doacoes ?? 0,
+      estudantes_ativos: row?.usuarios ?? 0,
+      co2_evitado_kg: Math.round(total * 2.3), // estimativa: ~2,3kg de CO2 por item que circula
     },
   });
 });

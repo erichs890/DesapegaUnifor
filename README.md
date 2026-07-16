@@ -8,20 +8,29 @@ Marketplace de **economia circular do campus** — estudantes doam e vendem livr
 
 | Camada | Tecnologias |
 |---|---|
-| Backend | Node.js + Express + TypeScript, SQLite nativo (`node:sqlite`), bcryptjs, jsonwebtoken, multer |
+| Backend | Node.js + Express + TypeScript, PostgreSQL (Supabase) via `pg`, bcryptjs, jsonwebtoken, multer |
 | Frontend | React 18 + TypeScript + Vite, React Router |
 | Animação | GSAP (ScrollTrigger, timelines) + anime.js (microinterações) |
 | PWA | `manifest.webmanifest` + Service Worker artesanal (network-first p/ API, stale-while-revalidate p/ assets e uploads) |
 
 ## Como rodar localmente
 
-Pré-requisito: **Node.js 22.5+** (o banco usa o módulo nativo `node:sqlite`; recomendado Node 24).
+Pré-requisitos: **Node.js 22+** e um projeto no **Supabase** (banco PostgreSQL gratuito).
+
+**Banco (uma vez):** no SQL Editor do Supabase, rode [`server/db/supabase-schema.sql`](server/db/supabase-schema.sql) e depois [`server/db/supabase-seed.sql`](server/db/supabase-seed.sql). Em seguida crie `server/.env`:
+
+```env
+DATABASE_URL=postgresql://postgres.SEU_REF:SUA_SENHA@aws-0-REGIAO.pooler.supabase.com:5432/postgres
+JWT_SECRET=um_valor_aleatorio_longo
+```
+
+> A connection string fica em **Connect → Session pooler** no dashboard do Supabase.
 
 ```bash
 # 1. Backend (porta 3001)
 cd server
 npm install
-npm start          # cria o banco e semeia usuários + anúncios na primeira execução
+npm start          # conecta no Supabase (exige server/.env configurado)
 
 # 2. Frontend (porta 5173) — em outro terminal
 cd web
@@ -97,10 +106,11 @@ Paleta extraída do CSS de produção de vortex.unifor.br: fundo `#170D29` (dark
 ## Estrutura
 
 ```
-server/                    API RESTful (Express + node:sqlite)
+server/                    API RESTful (Express + PostgreSQL/Supabase)
   src/index.ts             bootstrap + headers de segurança + estáticos /uploads
   src/env.ts               carrega server/.env antes dos demais módulos
-  src/db.ts                schema v2 (usuarios, anuncios, anuncio_imagens) + migrações
+  src/db.ts                pool pg + helpers de query
+  db/                      DDL do schema e seed (SQL do Supabase)
   src/auth.ts              JWT, requireAuth/optionalAuth, rate-limit de login
   src/routes-auth.ts       /api/auth (registro, login, google, me)
   src/routes.ts            /api/anuncios (CRUD + busca + paginação) e /api/stats

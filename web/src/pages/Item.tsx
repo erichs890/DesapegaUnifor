@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { getAnuncio, ApiError } from '../lib/api';
 import type { Anuncio, Vendedor } from '../lib/types';
 import { ESTADO_LABEL } from '../lib/types';
-import { formatData, formatPreco } from '../lib/format';
+import { formatData, formatPreco, parseDbDate } from '../lib/format';
 import { AnuncioCard } from '../components/AnuncioCard';
 import { Modal } from '../components/Modal';
 import { Avatar } from '../components/UserMenu';
@@ -154,7 +154,7 @@ export default function Item() {
     );
   }
 
-  const membroDesde = new Date(`${vendedor.criado_em.replace(' ', 'T')}Z`).toLocaleDateString('pt-BR', {
+  const membroDesde = parseDbDate(vendedor.criado_em).toLocaleDateString('pt-BR', {
     month: 'short',
     year: 'numeric',
   });
