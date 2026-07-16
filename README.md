@@ -88,7 +88,7 @@ Paleta extraída do CSS de produção de vortex.unifor.br: fundo `#170D29` (dark
 
 ## 🤖 Diário de Bordo da IA
 
-**Ferramentas utilizadas:** Claude (Claude Code, modelo Fable 5) como par de desenvolvimento durante todo o projeto — arquitetura, design system, implementação e testes guiados por prompts; skill de design `ui-ux-pro-max` (banco de estilos/paletas/heurísticas) consultada pelo próprio agente.
+**Ferramentas utilizadas:** Claude (Claude Code, modelo Fable 5) como par de desenvolvimento durante todo o projeto — arquitetura, design system, implementação e testes guiados por prompts; skill de design `ui-ux-pro-max` (banco de estilos/paletas/heurísticas) consultada pelo próprio agente; Supabase como banco PostgreSQL gerenciado.
 
 **Estratégia de engenharia de prompts (exemplos reais usados neste projeto):**
 
@@ -96,10 +96,13 @@ Paleta extraída do CSS de produção de vortex.unifor.br: fundo `#170D29` (dark
 2. **Evolução guiada por épicos com restrições explícitas:** "Você é um Tech Lead Full-Stack sênior… Você está evoluindo um projeto EXISTENTE — não reescreva do zero… MISSÃO — 6 ÉPICOS, NESTA ORDEM: (1) autenticação JWT com bcrypt e rate-limit, (2) upload real com validação por magic bytes e compressão client-side, (3) página de detalhe com galeria, (4) wizard de 3 etapas com rascunho em localStorage, (5) busca+paginação sincronizadas com a URL, (6) acabamento… RESTRIÇÕES INEGOCIÁVEIS: não trocar de stack, usar os tokens existentes, mensagens de erro com causa + como resolver, build limpo, testar de fato e reportar o que foi verificado."
 3. **Rebrand com fonte de verdade externa:** "Mude toda a paleta de cores para replicar a identidade visual do site vortex.unifor.br: analise as cores predominantes, extraia os códigos hexadecimais, aplique nas variáveis CSS mantendo contraste AA e gere paleta secundária para hover/disabled." — A IA baixou o CSS/JS de produção do site, extraiu as variáveis reais (`--dark-purple #170D29`, `--light-purple #6F4BEF`, `--light-blue #12CEE4`…) e derivou os tons intermediários com contraste verificado.
 
+4. **Migração de banco em duas fases:** "Quero o banco de dados no Supabase, vou criar o projeto do Supabase e do GitHub, enquanto isso vai gerando os DDLs." — Separar a geração dos DDLs (schema Postgres com CHECKs, índices e RLS + seed idempotente) da migração do código permitiu trabalhar em paralelo: quando o projeto ficou pronto, a IA validou a conexão, reescreveu a camada de dados de `node:sqlite` para `pg` (rotas assíncronas, transações, parsers de bigint/numeric) e testou o fluxo completo contra o banco real antes de commitar.
+
 **Reflexão crítica (momentos em que a IA errou e como foi corrigida):**
 1. A primeira sugestão de paleta da skill de design veio **rose/vermelho com serifas "acadêmicas"** — inadequada para um marketplace de sustentabilidade mobile-first. Foi preciso rejeitar a recomendação automática e refinar a busca com termos melhores até chegar a uma paleta com contraste AA.
 2. Os números das estatísticas ficavam **travados em "0"** quando o usuário tinha `prefers-reduced-motion` ativo: a implementação inicial só escrevia o valor no fim da animação de count-up. O correto (identificado num screenshot de verificação) é renderizar o valor final imediatamente e tratar a animação como aprimoramento progressivo.
-3. Ao gerar uma função de sanitização, a IA escreveu **bytes de controle literais dentro da regex** — o arquivo passou a ser tratado como binário pelo grep e quebraria em vários editores. Detectado ao rodar o typecheck/busca e corrigido reescrevendo a regex com escapes unicode explícitos na regex.
+3. Ao gerar uma função de sanitização, a IA escreveu **bytes de controle literais dentro da regex** — o arquivo passou a ser tratado como binário pelo grep e quebraria em vários editores. Detectado ao rodar o typecheck/busca e corrigido reescrevendo a regex com escapes unicode explícitos.
+4. Ao mover variáveis de ambiente que estavam no arquivo errado (`web/.env` em vez de `server/.env`), um script gerado pela IA **falhou no meio da execução e apagou o conteúdo dos dois arquivos** — incluindo a connection string do banco. A recuperação veio do histórico local do VS Code (`%APPDATA%/Code/User/History`). Lição dupla: scripts que movem dados devem escrever o destino **antes** de limpar a origem, e segredos de servidor nunca ficam na pasta do frontend (no Vite, variáveis `VITE_*` vão parar no bundle do navegador).
 
 **Compartilhamento de histórico:** _[opcional — cole aqui o link público da conversa]_
 
@@ -123,4 +126,3 @@ web/                       Frontend PWA (React + TS + Vite)
   src/pages/               Landing, Item, Anunciar (wizard), Entrar, Cadastro, Perfil…
   public/sw.js             Service Worker v2 (cache offline)
 ```
-"# DesapegaUnifor" 
