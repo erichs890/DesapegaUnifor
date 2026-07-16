@@ -38,13 +38,13 @@ export default function Item() {
         setVendedor(r.vendedor);
         setRelacionados(r.relacionados);
         setState('ready');
-        document.title = `${r.anuncio.titulo} — DesapegoUni`;
+        document.title = `${r.anuncio.titulo} — DesapegaUnifor`;
       })
       .catch((err) => {
         setState(err instanceof ApiError && err.status === 404 ? 'notfound' : 'error');
       });
     return () => {
-      document.title = 'Desapego Universitário — Economia Circular no Campus';
+      document.title = 'DesapegaUnifor — Economia Circular no Campus';
     };
   }, [id]);
 
@@ -318,7 +318,7 @@ export default function Item() {
             Fale com <strong>{vendedor.nome}</strong> pelo email e combinem
             {anuncio.ponto_encontro ? ` no ponto sugerido: ${anuncio.ponto_encontro}.` : ' um ponto no campus.'}
           </p>
-          <a className="btn btn-primary" href={`mailto:${vendedor.email}?subject=${encodeURIComponent(`Interesse: ${anuncio.titulo} (DesapegoUni)`)}`}>
+          <a className="btn btn-primary" href={`mailto:${vendedor.email}?subject=${encodeURIComponent(`Interesse: ${anuncio.titulo} (DesapegaUnifor)`)}`}>
             Enviar email
           </a>
           <button

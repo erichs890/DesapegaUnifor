@@ -10,19 +10,10 @@ export function Navbar() {
   return (
     <header className="navbar">
       <div className="container navbar-inner">
-        <Link to="/" className="navbar-logo" aria-label="Desapego Universitário — início">
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="9" fill="var(--color-primary)" />
-            <path
-              d="M10 18.5a6 6 0 0 1 10.4-4.1M22 13.5a6 6 0 0 1-10.4 4.1"
-              stroke="#12CEE4"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-            <path d="M20.5 9.5l1.8 3.8-4 .9M11.5 22.5l-1.8-3.8 4-.9" stroke="#12CEE4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <Link to="/" className="navbar-logo" aria-label="DesapegaUnifor — início">
+          <img src="/icons/logo.svg" alt="" width={30} height={30} aria-hidden="true" />
           <span>
-            Desapego<em>Uni</em>
+            Desapega<em>Unifor</em>
           </span>
         </Link>
 

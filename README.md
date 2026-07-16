@@ -1,4 +1,4 @@
-# ♻️ Desapego Universitário
+# ♻️ DesapegaUnifor
 
 Marketplace de **economia circular do campus** — estudantes doam e vendem livros, calculadoras, jalecos, eletrônicos e móveis entre si. Desenvolvido para o Desafio Técnico do **Laboratório Vortex (UNIFOR)**, com identidade visual inspirada no próprio [vortex.unifor.br](https://vortex.unifor.br/).
 

@@ -1,5 +1,5 @@
 /**
- * Service Worker — Desapego Universitário (requisito PWA)
+ * Service Worker — DesapegaUnifor (requisito PWA)
  *
  * Estratégias:
  *  - App shell (navegações): network-first com fallback ao cache
