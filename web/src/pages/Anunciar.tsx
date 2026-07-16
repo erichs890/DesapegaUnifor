@@ -86,6 +86,7 @@ export default function Anunciar() {
   const [direction, setDirection] = useState<1 | -1>(1);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [sending, setSending] = useState(false);
+  const [uploadsPendentes, setUploadsPendentes] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(!!editId);
   const [draftBanner, setDraftBanner] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -214,15 +215,16 @@ export default function Anunciar() {
   };
 
   /* ---- envio ---- */
-  const handleSubmit = async (e: FormEvent) => {
+  // O submit implícito do form (Enter em qualquer campo) NUNCA publica:
+  // avança de etapa nas duas primeiras e é ignorado na terceira. Publicar
+  // só acontece pelo clique explícito no botão "Publicar".
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (sending) return;
-    // Enter em qualquer campo dispara o submit implícito do form — antes da
-    // etapa 3 isso deve AVANÇAR a etapa, nunca publicar o anúncio.
-    if (step < 3) {
-      avancar();
-      return;
-    }
+    if (step < 3) avancar();
+  };
+
+  const publicar = async () => {
+    if (sending || uploadsPendentes) return;
     const e1 = validarEtapa(1, form);
     const e2 = validarEtapa(2, form);
     if (Object.keys(e1).length) {
@@ -535,7 +537,11 @@ export default function Anunciar() {
             <div className="wizard-panel">
               <div className="field">
                 <span className="field-label-static">Fotos do item (até 5 — a primeira é a capa)</span>
-                <ImageUploader value={form.imagens} onChange={(imgs) => set('imagens', imgs)} />
+                <ImageUploader
+                  value={form.imagens}
+                  onChange={(imgs) => set('imagens', imgs)}
+                  onBusyChange={setUploadsPendentes}
+                />
               </div>
 
               <div className="field">
@@ -584,10 +590,19 @@ export default function Anunciar() {
               Continuar
             </button>
           ) : (
-            <button type="submit" className="btn btn-primary" disabled={sending}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={publicar}
+              disabled={sending || uploadsPendentes}
+            >
               {sending ? (
                 <>
                   <span className="spinner" aria-hidden="true" /> Publicando…
+                </>
+              ) : uploadsPendentes ? (
+                <>
+                  <span className="spinner" aria-hidden="true" /> Enviando fotos…
                 </>
               ) : editId ? (
                 'Salvar alterações'

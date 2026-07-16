@@ -1,4 +1,4 @@
-import { useCallback, useId, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import { uploadImagem, ApiError } from '../lib/api';
 import './ImageUploader.css';
 
@@ -19,6 +19,8 @@ interface PendingFile {
 interface Props {
   value: UploaderImage[];
   onChange: (imgs: UploaderImage[]) => void;
+  /** Notifica quando há uploads em andamento (para o pai travar o "Publicar"). */
+  onBusyChange?: (busy: boolean) => void;
   max?: number;
 }
 
@@ -52,7 +54,7 @@ async function compress(file: File): Promise<Blob> {
 
 let uid = 0;
 
-export function ImageUploader({ value, onChange, max = 5 }: Props) {
+export function ImageUploader({ value, onChange, onBusyChange, max = 5 }: Props) {
   const [pending, setPending] = useState<PendingFile[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [tab, setTab] = useState<'upload' | 'url'>('upload');
@@ -63,6 +65,13 @@ export function ImageUploader({ value, onChange, max = 5 }: Props) {
 
   const total = value.length + pending.length;
   const slotsLeft = max - total;
+
+  // "ocupado" = existe upload realmente em andamento (erros não travam o Publicar)
+  const busy = pending.some((p) => p.error === null);
+  useEffect(() => {
+    onBusyChange?.(busy);
+    return () => onBusyChange?.(false); // unmount não pode deixar o pai travado
+  }, [busy, onBusyChange]);
 
   // ref para evitar closures com value desatualizado durante uploads paralelos
   const valueRef = useRef(value);
