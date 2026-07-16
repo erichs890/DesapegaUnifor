@@ -113,3 +113,4 @@ web/                       Frontend PWA (React + TS + Vite)
   src/pages/               Landing, Item, Anunciar (wizard), Entrar, Cadastro, Perfil…
   public/sw.js             Service Worker v2 (cache offline)
 ```
+"# DesapegaUnifor" 
