@@ -90,7 +90,9 @@ export function validateAnuncio(body: unknown): ValidationResult {
     errors.ponto_encontro = 'O ponto de encontro precisa de pelo menos 3 caracteres.';
   }
 
-  const aceita_trocas: 0 | 1 = raw.aceita_trocas === true || raw.aceita_trocas === 1 ? 1 : 0;
+  // doação nunca aceita trocas — a flag só vale para venda
+  const aceita_trocas: 0 | 1 =
+    tipo === 'venda' && (raw.aceita_trocas === true || raw.aceita_trocas === 1) ? 1 : 0;
 
   let imagens: string[] = [];
   if (raw.imagens !== undefined) {

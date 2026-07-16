@@ -217,6 +217,12 @@ export default function Anunciar() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (sending) return;
+    // Enter em qualquer campo dispara o submit implícito do form — antes da
+    // etapa 3 isso deve AVANÇAR a etapa, nunca publicar o anúncio.
+    if (step < 3) {
+      avancar();
+      return;
+    }
     const e1 = validarEtapa(1, form);
     const e2 = validarEtapa(2, form);
     if (Object.keys(e1).length) {
@@ -242,7 +248,7 @@ export default function Anunciar() {
       estado_conservacao: form.estado,
       campus: form.campus || null,
       ponto_encontro: form.ponto.trim() || null,
-      aceita_trocas: form.trocas,
+      aceita_trocas: form.tipo === 'venda' && form.trocas, // doação nunca aceita trocas
       imagens: form.imagens.map((i) => i.url),
     };
 
@@ -502,22 +508,25 @@ export default function Anunciar() {
                 )}
               </div>
 
-              <div className="field switch-field">
-                <label htmlFor="trocas" id="label-trocas">
-                  Aceita trocas?
-                </label>
-                <button
-                  type="button"
-                  id="trocas"
-                  role="switch"
-                  aria-checked={form.trocas}
-                  aria-labelledby="label-trocas"
-                  className={`switch${form.trocas ? ' on' : ''}`}
-                  onClick={() => set('trocas', !form.trocas)}
-                >
-                  <span className="switch-thumb" />
-                </button>
-              </div>
+              {/* Doação não pede nada em troca — o switch só existe para venda */}
+              {form.tipo === 'venda' && (
+                <div className="field switch-field">
+                  <label htmlFor="trocas" id="label-trocas">
+                    Aceita trocas?
+                  </label>
+                  <button
+                    type="button"
+                    id="trocas"
+                    role="switch"
+                    aria-checked={form.trocas}
+                    aria-labelledby="label-trocas"
+                    className={`switch${form.trocas ? ' on' : ''}`}
+                    onClick={() => set('trocas', !form.trocas)}
+                  >
+                    <span className="switch-thumb" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
