@@ -14,7 +14,7 @@ create table if not exists usuarios (
   campus      text        check (campus in ('Campus', 'EAD', 'Polo da Medicina', 'Polo da Medicina Veterinária')),
   avatar_url  text,
   google_id   text,
-  matricula   text        check (matricula ~ '^\d{7}$'),
+  matricula   text        check (matricula ~ '^\d{2}[12]\d{4}$'), -- AA(ano) + S(semestre 1|2) + NNNN
   criado_em   timestamptz not null default now()
 );
 

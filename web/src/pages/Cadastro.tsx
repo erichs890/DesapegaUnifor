@@ -15,7 +15,7 @@ import { CAMPI } from '../lib/types';
 import './Auth.css';
 
 const EMAIL_UNIFOR_RE = /^[^\s@]+@edu\.unifor\.br$/i;
-const MATRICULA_RE = /^\d{7}$/;
+const MATRICULA_RE = /^\d{2}[12]\d{4}$/; // AA(ano) + S(semestre 1|2) + NNNN
 
 interface Form {
   nome: string;
@@ -38,7 +38,7 @@ function validate(f: Form): Errors {
   else if (!EMAIL_UNIFOR_RE.test(f.email.trim())) errors.email = 'Use o seu email institucional da UNIFOR (nome@edu.unifor.br).';
 
   if (!f.matricula) errors.matricula = 'Informe sua matrícula.';
-  else if (!MATRICULA_RE.test(f.matricula)) errors.matricula = 'A matrícula tem exatamente 7 números.';
+  else if (!MATRICULA_RE.test(f.matricula)) errors.matricula = 'Matrícula inválida: são 7 números — ano de ingresso (2 dígitos), semestre (1 ou 2) e mais 4 números. Ex: 2420145.';
 
   if (!f.senha) errors.senha = 'Crie uma senha.';
   else if (f.senha.length < 8) errors.senha = 'A senha precisa de pelo menos 8 caracteres.';
@@ -160,7 +160,7 @@ export default function Cadastro() {
               type="text"
               inputMode="numeric"
               maxLength={7}
-              placeholder="7 números, ex: 2311001"
+              placeholder="Ex: 2420145 (ano + semestre + nº)"
               value={form.matricula}
               onChange={(e) => set('matricula', e.target.value.replace(/\D/g, '').slice(0, 7))}
               onBlur={() => blur('matricula')}

@@ -14,7 +14,7 @@ import {
 export const authRouter = Router();
 
 const EMAIL_UNIFOR_RE = /^[^\s@]+@edu\.unifor\.br$/i;
-const MATRICULA_RE = /^\d{7}$/;
+const MATRICULA_RE = /^\d{2}[12]\d{4}$/; // AA(ano) + S(semestre 1|2) + NNNN
 
 /** Sanitiza: remove caracteres de controle, apara e limita tamanho. */
 const clean = (v: unknown, max = 120): string =>
@@ -53,7 +53,7 @@ authRouter.post('/registro', async (req, res: Response) => {
   const matricula = clean(body.matricula, 16);
   if (!matricula) errors.matricula = 'Informe sua matrícula.';
   else if (!MATRICULA_RE.test(matricula)) {
-    errors.matricula = 'A matrícula tem exatamente 7 números (só dígitos).';
+    errors.matricula = 'Matrícula inválida: são 7 números — ano de ingresso (2 dígitos), semestre (1 ou 2) e mais 4 números. Ex: 2420145.';
   }
 
   const senha = typeof body.senha === 'string' ? body.senha : '';
@@ -220,7 +220,7 @@ authRouter.patch('/me', requireAuth, async (req: AuthRequest, res: Response) => 
   if (body.matricula !== undefined) {
     const m = clean(body.matricula, 16);
     if (m === '') matricula = null;
-    else if (!MATRICULA_RE.test(m)) errors.matricula = 'A matrícula tem exatamente 7 números (só dígitos).';
+    else if (!MATRICULA_RE.test(m)) errors.matricula = 'Matrícula inválida: são 7 números — ano de ingresso (2 dígitos), semestre (1 ou 2) e mais 4 números. Ex: 2420145.';
     else {
       const taken = await one('select id from usuarios where matricula = $1 and id != $2', [m, user.id]);
       if (taken) errors.matricula = 'Essa matrícula já está cadastrada em outra conta.';

@@ -22,7 +22,7 @@ export default function Perfil() {
 
   const nomeError = nome.trim().length < 2 ? 'O nome precisa de pelo menos 2 caracteres.' : undefined;
   const matriculaError =
-    matricula !== '' && !/^\d{7}$/.test(matricula) ? 'A matrícula tem exatamente 7 números.' : undefined;
+    matricula !== '' && !/^\d{2}[12]\d{4}$/.test(matricula) ? 'Matrícula inválida: são 7 números — ano de ingresso (2 dígitos), semestre (1 ou 2) e mais 4 números. Ex: 2420145.' : undefined;
   const membroDesde = parseDbDate(user.criado_em).toLocaleDateString('pt-BR', {
     month: 'long',
     year: 'numeric',
@@ -137,7 +137,7 @@ export default function Perfil() {
             type="text"
             inputMode="numeric"
             maxLength={7}
-            placeholder="7 números, ex: 2311001"
+            placeholder="Ex: 2420145 (ano + semestre + nº)"
             value={matricula}
             onChange={(e) => setMatricula(e.target.value.replace(/\D/g, '').slice(0, 7))}
             aria-invalid={!!matriculaError}
