@@ -10,7 +10,6 @@ import {
   STRENGTH_COLORS,
   STRENGTH_LABELS,
 } from '../components/AuthShared';
-import { GoogleButton } from '../components/GoogleButton';
 import { CAMPI } from '../lib/types';
 import './Auth.css';
 
@@ -257,8 +256,6 @@ export default function Cadastro() {
             )}
           </button>
         </form>
-
-        <GoogleButton />
 
         <p className="auth-alt">
           Já tem conta?{' '}

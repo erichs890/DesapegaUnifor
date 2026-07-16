@@ -4,7 +4,6 @@ import { login, ApiError } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 import { AuthBrandPanel, PasswordInput } from '../components/AuthShared';
-import { GoogleButton } from '../components/GoogleButton';
 import './Auth.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -111,8 +110,6 @@ export default function Entrar() {
             )}
           </button>
         </form>
-
-        <GoogleButton />
 
         <p className="auth-alt">
           Ainda não tem conta?{' '}

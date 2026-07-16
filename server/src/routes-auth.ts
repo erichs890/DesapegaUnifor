@@ -1,5 +1,4 @@
 import { Router, type Response } from 'express';
-import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { q, one, publicUser, type Usuario } from './db.js';
 import {
@@ -117,77 +116,6 @@ authRouter.post('/login', async (req, res: Response) => {
   }
 
   clearLoginAttempts(email);
-  res.json({ token: signToken(user.id), usuario: await ownUser(user) });
-});
-
-/**
- * POST /api/auth/google — login/cadastro com Google Identity Services.
- * Validamos o ID token no endpoint tokeninfo do Google (assinatura +
- * expiração) e conferimos o `aud` com o nosso Client ID.
- */
-authRouter.post('/google', async (req, res: Response) => {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  if (!clientId) {
-    return res.status(501).json({
-      error: 'Login com Google não está configurado neste servidor. Defina GOOGLE_CLIENT_ID no server/.env (veja o README).',
-    });
-  }
-
-  const credential = typeof (req.body as Record<string, unknown>)?.credential === 'string'
-    ? ((req.body as Record<string, unknown>).credential as string)
-    : '';
-  if (!credential) {
-    return res.status(422).json({ error: 'Credencial do Google ausente. Tente entrar novamente.' });
-  }
-
-  let info: Record<string, string>;
-  try {
-    const resp = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`
-    );
-    if (!resp.ok) {
-      return res.status(401).json({ error: 'O Google não reconheceu essa credencial. Tente de novo.' });
-    }
-    info = (await resp.json()) as Record<string, string>;
-  } catch {
-    return res.status(502).json({ error: 'Não foi possível falar com o Google agora. Tente novamente em instantes.' });
-  }
-
-  if (info.aud !== clientId) {
-    return res.status(401).json({ error: 'Credencial emitida para outro aplicativo. Recarregue a página e tente de novo.' });
-  }
-  if (info.email_verified !== 'true' || !info.email || !info.sub) {
-    return res.status(401).json({ error: 'Sua conta Google não tem email verificado — use email e senha.' });
-  }
-
-  const email = info.email.toLowerCase();
-  const googleId = info.sub;
-  const nome = clean(info.name, 80) || email.split('@')[0];
-  const avatar = typeof info.picture === 'string' && /^https:\/\//.test(info.picture) ? info.picture : null;
-
-  let user = await one<Usuario>('select * from usuarios where google_id = $1', [googleId]);
-
-  if (!user) {
-    // vincula a uma conta existente com o mesmo email (verificado pelo Google)
-    const byEmail = await one<Usuario>('select * from usuarios where lower(email) = $1', [email]);
-    if (byEmail) {
-      const rows = await q<Usuario>(
-        'update usuarios set google_id = $1, avatar_url = coalesce(avatar_url, $2) where id = $3 returning *',
-        [googleId, avatar, byEmail.id]
-      );
-      user = rows[0];
-    } else {
-      // conta nova: sem senha utilizável (hash de bytes aleatórios)
-      const senha_hash = bcrypt.hashSync(crypto.randomUUID() + crypto.randomUUID(), 12);
-      const rows = await q<Usuario>(
-        `insert into usuarios (nome, email, senha_hash, avatar_url, google_id)
-         values ($1, $2, $3, $4, $5) returning *`,
-        [nome, email, senha_hash, avatar, googleId]
-      );
-      user = rows[0];
-    }
-  }
-
   res.json({ token: signToken(user.id), usuario: await ownUser(user) });
 });
 

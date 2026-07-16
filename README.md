@@ -2,7 +2,7 @@
 
 Marketplace de **economia circular do campus** — estudantes doam e vendem livros, calculadoras, jalecos, eletrônicos e móveis entre si. Desenvolvido para o Desafio Técnico do **Laboratório Vortex (UNIFOR)**, com identidade visual inspirada no próprio [vortex.unifor.br](https://vortex.unifor.br/).
 
-**Funcionalidades:** contas com JWT e login com Google · cadastro com email institucional (@edu.unifor.br) e matrícula · upload real de fotos (até 5 por anúncio, com compressão no cliente) · página de detalhe com galeria · cadastro de item em 3 etapas com rascunho automático · busca/ordenação/paginação sincronizadas com a URL · edição e remoção de anúncios · perfil com avatar · PWA instalável com cache offline.
+**Funcionalidades:** contas com JWT · cadastro com email institucional (@edu.unifor.br) e matrícula · upload real de fotos (até 5 por anúncio, com compressão no cliente) · página de detalhe com galeria · cadastro de item em 3 etapas com rascunho automático · busca/ordenação/paginação sincronizadas com a URL · edição e remoção de anúncios · perfil com avatar · PWA instalável com cache offline.
 
 ## Stack
 
@@ -50,12 +50,6 @@ Abra `http://localhost:5173`.
 
 > O cadastro exige email institucional `nome@edu.unifor.br` e matrícula de 7 dígitos. Campi disponíveis: Campus, EAD, Polo da Medicina e Polo da Medicina Veterinária.
 
-### Login com Google (opcional)
-
-1. No [Google Cloud Console](https://console.cloud.google.com/apis/credentials), crie um **OAuth Client ID** (tipo "Aplicativo da Web") com `http://localhost:5173` nas *origens JavaScript autorizadas*.
-2. Copie `server/.env.example` para `server/.env` e `web/.env.example` para `web/.env`, preenchendo `GOOGLE_CLIENT_ID` e `VITE_GOOGLE_CLIENT_ID` com o mesmo Client ID.
-3. Reinicie os dois servidores. Sem configuração, o botão explica como ativar (o restante do app funciona normalmente).
-
 ### Para testar o PWA (o Service Worker só registra em produção)
 
 ```bash
@@ -70,7 +64,6 @@ npm run preview    # instale pelo ícone na barra de endereço
 |---|---|---|---|
 | POST | `/api/auth/registro` | — | Cria conta (email @edu.unifor.br + matrícula 7 dígitos) → 201 + JWT |
 | POST | `/api/auth/login` | — | Login → JWT 7d (rate-limit: 5/min por email) |
-| POST | `/api/auth/google` | — | Login com Google (valida ID token + `aud`) |
 | GET | `/api/auth/me` | Bearer | Perfil + estatísticas próprias |
 | PATCH | `/api/auth/me` | Bearer | Editar nome/curso/campus/avatar/matrícula |
 | POST | `/api/upload` | Bearer | Upload de imagem (magic bytes, máx 5MB) → `{url}` |

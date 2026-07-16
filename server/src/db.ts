@@ -65,7 +65,6 @@ export interface Usuario {
   curso: string | null;
   campus: string | null;
   avatar_url: string | null;
-  google_id: string | null;
   matricula: string | null;
   criado_em: string; // timestamptz — serializado como ISO no JSON
 }

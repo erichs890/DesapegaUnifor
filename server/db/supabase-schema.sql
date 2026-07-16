@@ -13,14 +13,12 @@ create table if not exists usuarios (
   curso       text,
   campus      text        check (campus in ('Campus', 'EAD', 'Polo da Medicina', 'Polo da Medicina Veterinária')),
   avatar_url  text,
-  google_id   text,
   matricula   text        check (matricula ~ '^\d{2}[12]\d{4}$'), -- AA(ano) + S(semestre 1|2) + NNNN
   criado_em   timestamptz not null default now()
 );
 
 -- email único case-insensitive (equivale ao COLLATE NOCASE do SQLite)
 create unique index if not exists idx_usuarios_email on usuarios (lower(email));
-create unique index if not exists idx_usuarios_google on usuarios (google_id) where google_id is not null;
 create unique index if not exists idx_usuarios_matricula on usuarios (matricula) where matricula is not null;
 
 -- ---------- ANÚNCIOS ----------
