@@ -1,8 +1,25 @@
 .stats {
-  background: var(--color-brand-deep);
+  position: relative;
+  background:
+    radial-gradient(42rem 16rem at 20% 0%, rgb(111 75 239 / 0.22), transparent 65%),
+    radial-gradient(38rem 14rem at 85% 100%, rgb(18 206 228 / 0.10), transparent 60%),
+    var(--color-brand-deep);
   color: var(--color-foreground);
   border-block: 1px solid var(--color-border);
   padding-block: var(--space-8);
+  overflow: hidden;
+}
+
+/* Fio de luz no topo da faixa — costura a seção com a marca */
+.stats::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(60rem, 90%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(185 164 255 / 0.55), rgb(18 206 228 / 0.45), transparent);
 }
 
 .stats-grid {
@@ -23,7 +40,11 @@
   font-size: var(--text-xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums; /* evita "dança" de layout no count-up */
-  color: #12CEE4;
+  color: var(--color-accent-strong);
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .stat span {
@@ -34,5 +55,9 @@
 @media (min-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+  /* divisores verticais suaves entre os números */
+  .stat + .stat {
+    border-left: 1px solid rgb(255 255 255 / 0.09);
   }
 }

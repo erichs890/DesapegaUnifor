@@ -12,7 +12,10 @@
 /* ---- Painel da marca (desktop) ---- */
 .auth-brand {
   display: none;
-  background: linear-gradient(150deg, var(--color-brand-deep) 0%, var(--color-background) 100%);
+  background:
+    radial-gradient(36rem 26rem at 80% 10%, rgb(111 75 239 / 0.28), transparent 60%),
+    radial-gradient(30rem 22rem at 10% 90%, rgb(18 206 228 / 0.12), transparent 55%),
+    linear-gradient(150deg, var(--color-brand-deep) 0%, var(--color-background) 100%);
   color: var(--color-foreground);
   padding: var(--space-16);
   flex-direction: column;
@@ -31,6 +34,12 @@
   height: 380px;
   border-radius: 50%;
   border: 48px solid rgb(255 255 255 / 0.08);
+  animation: auth-ring 14s ease-in-out infinite alternate;
+}
+
+@keyframes auth-ring {
+  from { transform: scale(0.96) rotate(0deg); }
+  to { transform: scale(1.06) rotate(10deg); }
 }
 
 @media (min-width: 1024px) {
@@ -88,6 +97,11 @@
 .auth-panel h1 {
   font-size: var(--text-xl);
   color: var(--color-primary-strong);
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  width: fit-content;
 }
 
 .auth-panel > p {

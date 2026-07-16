@@ -11,6 +11,18 @@
 .vitrine-header h2 {
   font-size: var(--text-xl);
   color: var(--color-primary-strong);
+  width: fit-content;
+}
+
+/* Fio de marca sob o título da seção */
+.vitrine-header h2::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--gradient-brand);
 }
 
 .vitrine-header p {
@@ -169,6 +181,11 @@
   border-color: var(--color-primary);
   color: var(--color-on-primary);
   font-weight: 700;
+  box-shadow: 0 4px 18px rgb(111 75 239 / 0.35);
+}
+
+.chip-doacoes.active {
+  box-shadow: 0 4px 18px rgb(18 206 228 / 0.25);
 }
 
 /* ---- Grid ---- */

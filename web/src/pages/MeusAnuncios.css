@@ -33,13 +33,21 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  background: var(--color-surface);
+  background: linear-gradient(160deg, var(--color-surface-raised), var(--color-surface));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-4) var(--space-6);
   margin-bottom: 12px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  transition: border-color var(--motion-base) var(--ease-out), box-shadow var(--motion-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .meu-item:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .meu-categoria {

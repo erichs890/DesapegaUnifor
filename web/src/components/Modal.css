@@ -3,6 +3,8 @@
   inset: 0;
   z-index: var(--z-modal);
   background: rgb(10 6 20 / 0.6); /* scrim 55%: isola o primeiro plano */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,7 +14,8 @@
 .modal-panel {
   width: 100%;
   max-width: 26rem;
-  background: var(--color-surface);
+  background: linear-gradient(170deg, var(--color-surface-raised), var(--color-surface));
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;

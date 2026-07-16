@@ -2,10 +2,18 @@
   position: sticky;
   top: 0;
   z-index: var(--z-nav);
-  background: rgb(23 13 41 / 0.82);
+  background: rgb(23 13 41 / 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid transparent;
+  transition: background-color var(--motion-base) var(--ease-out), border-color var(--motion-base) var(--ease-out), box-shadow var(--motion-base) var(--ease-out);
+}
+
+/* Após rolar: a barra "descola" do conteúdo com borda e sombra */
+.navbar.scrolled {
+  background: rgb(23 13 41 / 0.88);
+  border-bottom-color: var(--color-border);
+  box-shadow: var(--shadow-md);
 }
 
 .navbar-inner {
@@ -28,7 +36,20 @@
 
 .navbar-logo em {
   font-style: normal;
-  color: var(--color-primary);
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navbar-logo img {
+  transition: transform 500ms var(--ease-spring);
+}
+
+@media (hover: hover) {
+  .navbar-logo:hover img {
+    transform: rotate(180deg); /* eco do ciclo de reuso */
+  }
 }
 
 .navbar-links {

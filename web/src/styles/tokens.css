@@ -76,10 +76,17 @@
   --radius-lg: 20px;
   --radius-full: 999px;
 
+  /* ---- Gradientes de marca ---- */
+  --gradient-brand: linear-gradient(120deg, #B9A4FF 0%, #6F4BEF 45%, #12CEE4 100%);
+  --gradient-text: linear-gradient(105deg, #CFC0FF 0%, #8FE8F5 100%); /* extremos ≥7:1 s/ bg */
+  --gradient-cta: linear-gradient(135deg, #12CEE4 0%, #4FD9EA 100%);
+
   /* ---- Elevação (escala consistente, sombras profundas p/ tema escuro) ---- */
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 14px rgb(0 0 0 / 0.35);
   --shadow-lg: 0 14px 36px rgb(0 0 0 / 0.5);
+  --glow-primary: 0 0 0 1px rgb(111 75 239 / 0.45), 0 8px 32px rgb(111 75 239 / 0.28);
+  --glow-accent: 0 0 0 1px rgb(18 206 228 / 0.35), 0 8px 32px rgb(18 206 228 / 0.22);
 
   /* ---- Movimento (tokens globais de ritmo) ---- */
   --motion-fast: 150ms;
@@ -87,6 +94,7 @@
   --motion-slow: 320ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.64, 0, 0.78, 0);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* overshoot leve p/ microinterações */
 
   /* ---- Z-index (escala definida) ---- */
   --z-nav: 40;

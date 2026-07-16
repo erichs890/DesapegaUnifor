@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserMenu } from './UserMenu';
@@ -6,9 +7,18 @@ import './Navbar.css';
 export function Navbar() {
   const { pathname } = useLocation();
   const { status } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  // Sombra e fundo mais densos após rolar — a barra "descola" do conteúdo
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <header className="navbar">
+    <header className={`navbar${scrolled ? ' scrolled' : ''}`}>
       <div className="container navbar-inner">
         <Link to="/" className="navbar-logo" aria-label="DesapegaUnifor — início">
           <img src="/icons/logo.svg" alt="" width={30} height={30} aria-hidden="true" />

@@ -30,6 +30,25 @@ export function Hero() {
         gsap.to('.hero-card--b', { y: 10, duration: 3.8, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 0.4 });
       });
 
+      // Parallax de ponteiro: os cartões acompanham o mouse em profundidades
+      // diferentes (desktop com ponteiro fino; nunca com movimento reduzido)
+      mm.add('(prefers-reduced-motion: no-preference) and (hover: hover) and (min-width: 1024px)', () => {
+        const el = scope.current!;
+        const moveA = { x: gsap.quickTo('.hero-card--a', 'x', { duration: 0.6, ease: 'power3.out' }), y: gsap.quickTo('.hero-card--a', 'yPercent', { duration: 0.6, ease: 'power3.out' }) };
+        const moveB = { x: gsap.quickTo('.hero-card--b', 'x', { duration: 0.8, ease: 'power3.out' }), y: gsap.quickTo('.hero-card--b', 'yPercent', { duration: 0.8, ease: 'power3.out' }) };
+        const onMove = (e: PointerEvent) => {
+          const r = el.getBoundingClientRect();
+          const nx = (e.clientX - r.left) / r.width - 0.5;
+          const ny = (e.clientY - r.top) / r.height - 0.5;
+          moveA.x(nx * 22);
+          moveA.y(ny * 6);
+          moveB.x(nx * -16);
+          moveB.y(ny * -5);
+        };
+        el.addEventListener('pointermove', onMove);
+        return () => el.removeEventListener('pointermove', onMove);
+      });
+
       // Fallback sem movimento: garante que nada fique invisível
       mm.add('(prefers-reduced-motion: reduce)', () => {
         gsap.set('.hero-badge, .hero-sub, .hero-ctas > *, .hero-card', { clearProps: 'all' });
@@ -53,7 +72,7 @@ export function Hero() {
 
           <h1 className="hero-title" id="hero-title">
             <span className="line"><span className="line-inner">O que você não usa,</span></span>
-            <span className="line"><span className="line-inner">move a jornada de alguém.</span></span>
+            <span className="line"><span className="line-inner text-gradient">move a jornada de alguém.</span></span>
           </h1>
 
           <p className="hero-sub">
@@ -93,6 +112,7 @@ export function Hero() {
             <span className="hero-card-badge venda">R$ 180</span>
           </div>
           <div className="hero-blob" />
+          <div className="hero-ring" />
         </div>
       </div>
     </section>

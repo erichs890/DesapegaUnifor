@@ -117,6 +117,7 @@
 .galeria-thumbs button.active {
   opacity: 1;
   border-color: var(--color-primary);
+  box-shadow: 0 0 12px rgb(111 75 239 / 0.45);
 }
 
 .galeria-thumbs img {
@@ -156,6 +157,11 @@
   font-size: var(--text-xl);
   font-weight: 700;
   color: var(--color-accent-strong);
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  width: fit-content;
 }
 
 .item-preco.doacao {
@@ -225,9 +231,14 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4);
-  background: var(--color-surface);
+  background: linear-gradient(160deg, var(--color-surface-raised), var(--color-surface));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  transition: border-color var(--motion-base) var(--ease-out);
+}
+
+.item-vendedor:hover {
+  border-color: var(--color-border-strong);
 }
 
 .item-vendedor strong {

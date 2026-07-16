@@ -26,6 +26,43 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Atmosfera: aurora fixa e muito sutil atrás de todo o app — dá
+   profundidade ao dark theme sem competir com o conteúdo */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 85% -10%, rgb(111 75 239 / 0.14), transparent 60%),
+    radial-gradient(50rem 36rem at -15% 30%, rgb(18 206 228 / 0.07), transparent 55%),
+    radial-gradient(44rem 44rem at 55% 110%, rgb(54 34 93 / 0.5), transparent 60%);
+}
+
+::selection {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* Scrollbar discreta, no tom da marca (desktop) */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--color-background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+  }
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-heading);
   line-height: var(--leading-heading);
@@ -98,6 +135,15 @@ input, textarea, select {
   }
 }
 
+/* Texto com gradiente da marca (fallback: cor sólida AA) */
+.text-gradient {
+  color: var(--color-primary-strong);
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -112,6 +158,8 @@ input, textarea, select {
 
 /* ============ Botões ============ */
 .btn {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -134,13 +182,30 @@ input, textarea, select {
 }
 
 .btn-primary {
-  background: var(--color-accent);
+  background: var(--gradient-cta);
   color: var(--color-on-accent);
   box-shadow: var(--shadow-md);
 }
+
+/* Sheen: brilho diagonal que varre o CTA no hover (ponteiro fino) */
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .btn-primary:hover::before {
+    transition: transform 600ms var(--ease-out);
+    transform: translateX(120%);
+  }
+}
+
 .btn-primary:hover {
   background: var(--color-accent-strong);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--glow-accent);
   transform: translateY(-2px);
 }
 
@@ -152,6 +217,8 @@ input, textarea, select {
 .btn-secondary:hover {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
+  transform: translateY(-1px);
+  box-shadow: var(--glow-primary);
 }
 
 .btn-ghost {

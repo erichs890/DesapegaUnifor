@@ -12,8 +12,17 @@
   font-size: clamp(4rem, 14vw, 8rem);
   font-weight: 700;
   line-height: 1;
-  color: var(--color-primary-soft);
-  -webkit-text-stroke: 2px var(--color-primary);
+  color: var(--color-primary-strong);
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: notfound-float 5s ease-in-out infinite alternate;
+}
+
+@keyframes notfound-float {
+  from { transform: translateY(-6px); }
+  to { transform: translateY(6px); }
 }
 
 .notfound h1 {

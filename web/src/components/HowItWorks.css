@@ -8,6 +8,17 @@
   font-size: var(--text-xl);
   color: var(--color-primary-strong);
   margin-bottom: var(--space-8);
+  width: fit-content;
+}
+
+.how h2::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--gradient-brand);
 }
 
 .how-grid {
@@ -20,21 +31,39 @@
   padding: var(--space-6);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: var(--color-background);
+  background: linear-gradient(165deg, var(--color-background), #140B24 90%);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  transition:
+    transform var(--motion-base) var(--ease-out),
+    border-color var(--motion-base) var(--ease-out),
+    box-shadow var(--motion-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .how-step:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md), var(--glow-primary);
+  }
+  .how-step:hover .how-icon {
+    transform: scale(1.08) rotate(-4deg);
+    box-shadow: var(--glow-primary);
+  }
 }
 
 .how-num {
   position: absolute;
-  top: var(--space-4);
+  top: var(--space-3);
   right: var(--space-4);
   font-family: var(--font-heading);
-  font-size: var(--text-xl);
+  font-size: 3rem;
   font-weight: 700;
-  color: var(--color-border-strong);
   line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-border-strong);
+  opacity: 0.9;
 }
 
 .how-icon {
@@ -45,7 +74,9 @@
   height: 48px;
   border-radius: var(--radius-md);
   background: var(--color-primary-soft);
+  border: 1px solid var(--color-border-strong);
   color: var(--color-primary-strong);
+  transition: transform var(--motion-base) var(--ease-spring), box-shadow var(--motion-base) var(--ease-out);
 }
 
 .how-step h3 {
@@ -59,16 +90,33 @@
 }
 
 .how-cta {
+  position: relative;
+  overflow: hidden;
   margin-top: var(--space-12);
   padding: var(--space-8);
   border-radius: var(--radius-lg);
-  background: linear-gradient(120deg, var(--color-brand-deep), var(--color-primary));
+  background:
+    radial-gradient(30rem 14rem at 90% -20%, rgb(18 206 228 / 0.28), transparent 60%),
+    linear-gradient(120deg, var(--color-brand-deep), var(--color-primary));
   color: var(--color-on-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
   text-align: center;
+}
+
+/* Anel decorativo no canto do CTA — eco da identidade circular */
+.how-cta::after {
+  content: '';
+  position: absolute;
+  left: -70px;
+  bottom: -70px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 30px solid rgb(255 255 255 / 0.07);
+  pointer-events: none;
 }
 
 .how-cta p {
