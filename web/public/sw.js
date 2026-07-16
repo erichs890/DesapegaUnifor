@@ -9,7 +9,7 @@
  *  - GET /api: network-first com fallback ao cache
  *    → dados já carregados continuam visíveis offline (bônus do edital).
  */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL_CACHE = `shell-${VERSION}`;
 const ASSET_CACHE = `assets-${VERSION}`;
 const API_CACHE = `api-${VERSION}`;
