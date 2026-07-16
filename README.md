@@ -48,7 +48,7 @@ Abra `http://localhost:5173`.
 | `bruno@edu.unifor.br` | `senha123` | 2211002 |
 | `carla@edu.unifor.br` | `senha123` | 2111003 |
 
-> O cadastro exige email institucional `nome@edu.unifor.br` e matrícula de 7 dígitos. Campi disponíveis: Campus, EAD, Polo da Medicina e Polo da Medicina Veterinária.
+> O cadastro exige email institucional `nome@edu.unifor.br` e matrícula de 7 dígitos no padrão da UNIFOR: **ano de ingresso (2 dígitos) + semestre (1 ou 2) + 4 dígitos** — ex: `2420145`. Validada no formulário, na API e por CHECK constraint no banco. Campi: Campus, EAD, Polo da Medicina e Polo da Medicina Veterinária.
 
 ### Para testar o PWA (o Service Worker só registra em produção)
 
@@ -91,11 +91,14 @@ Paleta extraída do CSS de produção de vortex.unifor.br: fundo `#170D29` (dark
 
 4. **Migração de banco em duas fases:** "Quero o banco de dados no Supabase, vou criar o projeto do Supabase e do GitHub, enquanto isso vai gerando os DDLs." — Separar a geração dos DDLs (schema Postgres com CHECKs, índices e RLS + seed idempotente) da migração do código permitiu trabalhar em paralelo: quando o projeto ficou pronto, a IA validou a conexão, reescreveu a camada de dados de `node:sqlite` para `pg` (rotas assíncronas, transações, parsers de bigint/numeric) e testou o fluxo completo contra o banco real antes de commitar.
 
+5. **Regra de domínio em linguagem natural:** "A matrícula segue uma lógica: os dois primeiros dígitos são o ano em que a pessoa ingressou e o terceiro é o semestre, ou seja, não pode ter matrícula xx3xxxx, só xx1 ou xx2." — Uma regra de negócio descrita informalmente virou validação em três camadas (formulário, API e CHECK constraint no Postgres), com a IA conferindo antes se os dados existentes no banco respeitavam a regra nova. No mesmo espírito, "como é só para estudantes, não faz sentido alguém de fora entrar" levou à remoção completa do login com Google (rota, botão e coluna do banco).
+
 **Reflexão crítica (momentos em que a IA errou e como foi corrigida):**
 1. A primeira sugestão de paleta da skill de design veio **rose/vermelho com serifas "acadêmicas"** — inadequada para um marketplace de sustentabilidade mobile-first. Foi preciso rejeitar a recomendação automática e refinar a busca com termos melhores até chegar a uma paleta com contraste AA.
 2. Os números das estatísticas ficavam **travados em "0"** quando o usuário tinha `prefers-reduced-motion` ativo: a implementação inicial só escrevia o valor no fim da animação de count-up. O correto (identificado num screenshot de verificação) é renderizar o valor final imediatamente e tratar a animação como aprimoramento progressivo.
 3. Ao gerar uma função de sanitização, a IA escreveu **bytes de controle literais dentro da regex** — o arquivo passou a ser tratado como binário pelo grep e quebraria em vários editores. Detectado ao rodar o typecheck/busca e corrigido reescrevendo a regex com escapes unicode explícitos.
 4. Ao mover variáveis de ambiente que estavam no arquivo errado (`web/.env` em vez de `server/.env`), um script gerado pela IA **falhou no meio da execução e apagou o conteúdo dos dois arquivos** — incluindo a connection string do banco. A recuperação veio do histórico local do VS Code (`%APPDATA%/Code/User/History`). Lição dupla: scripts que movem dados devem escrever o destino **antes** de limpar a origem, e segredos de servidor nunca ficam na pasta do frontend (no Vite, variáveis `VITE_*` vão parar no bundle do navegador).
+5. O wizard de anúncio **publicava antes da etapa de fotos**: o botão final era `type="submit"` e o *submit implícito* do HTML (Enter em qualquer campo) disparava a publicação — um bug que os testes automatizados da IA não pegaram, mas o uso real pegou na hora. A correção foi tornar a publicação exclusiva do clique no botão "Publicar" (`type="button"`), fazer o Enter apenas avançar de etapa e travar o botão enquanto houver upload de foto em andamento. Lição: testar como usuário (teclado incluso), não só via chamadas de API.
 
 **Compartilhamento de histórico:** _[opcional — cole aqui o link público da conversa]_
 
@@ -115,7 +118,7 @@ server/                    API RESTful (Express + PostgreSQL/Supabase)
 web/                       Frontend PWA (React + TS + Vite)
   src/styles/tokens.css    design tokens (paleta Vortex, tipografia, motion)
   src/context/AuthContext  sessão JWT (hidratação via /me)
-  src/components/          Hero, Vitrine, ImageUploader, Modal, UserMenu, GoogleButton…
+  src/components/          Hero, Vitrine, ImageUploader, Modal, UserMenu, Toast…
   src/pages/               Landing, Item, Anunciar (wizard), Entrar, Cadastro, Perfil…
   public/sw.js             Service Worker v2 (cache offline)
 ```
